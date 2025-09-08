@@ -3,11 +3,9 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { Calendar } from './ui/calendar';
+import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import MultiStepBookingScreen from './MultiStepBookingScreen';
 import {
@@ -25,14 +23,16 @@ import {
   Search,
   Filter,
   Users,
-  BookOpen,
   Heart,
-  Brain,
   Zap,
   Award,
   UserCheck,
   Calendar as CalIcon,
-  ChevronRight
+  Download,
+  ArrowLeft,
+  ChevronRight,
+  FileText,
+  CreditCard
 } from 'lucide-react';
 
 interface BookingScreenProps {
@@ -67,6 +67,25 @@ interface GroupSession {
   maxParticipants: number;
   fee: string;
   description: string;
+}
+
+interface Booking {
+    id: number;
+    counselor: string;
+    date: string;
+    time: string;
+    type: string;
+    status: "upcoming" | "completed" | "cancelled";
+    sessionId: string;
+    fee: string;
+}
+
+interface CounselorCardProps {
+  counselor: Counselor;
+}
+
+interface GroupSessionCardProps {
+  session: GroupSession;
 }
 
 
@@ -109,7 +128,25 @@ const translations = {
       cancelled: "Cancelled",
       reschedule: "Reschedule",
       cancel: "Cancel",
-      join: "Join Session"
+      join: "Join Session",
+      viewDetails: "View Details"
+    },
+    bookingDetails: {
+        title: "Appointment Details",
+        back: "Back to Bookings",
+        counselorInfo: "Counselor Information",
+        patientInfo: "Patient Information",
+        bookingInfo: "Booking Information",
+        priceDetails: "Price Details",
+        listingPrice: "Listing Price",
+        discount: "Discount",
+        total: "Total Amount",
+        downloadInvoice: "Download Invoice",
+        status: "Status",
+        date: "Date",
+        time: "Time",
+        mode: "Mode",
+        duration: "Duration"
     },
     selectDateTime: "Select Date & Time",
     sessionDetails: "Session Details",
@@ -183,7 +220,25 @@ const translations = {
       cancelled: "रद्द",
       reschedule: "पुनर्निर्धारण",
       cancel: "रद्द करें",
-      join: "सत्र में शामिल हों"
+      join: "सत्र में शामिल हों",
+      viewDetails: "विवरण देखें"
+    },
+     bookingDetails: {
+        title: "अपॉइंटमेंट विवरण",
+        back: "बुकिंग पर वापस जाएं",
+        counselorInfo: "परामर्शदाता की जानकारी",
+        patientInfo: "मरीज की जानकारी",
+        bookingInfo: "बुकिंग जानकारी",
+        priceDetails: "मूल्य विवरण",
+        listingPrice: "सूची मूल्य",
+        discount: "छूट",
+        total: "कुल राशि",
+        downloadInvoice: "इनवॉइस डाउनलोड करें",
+        status: "स्थिति",
+        date: "तारीख",
+        time: "समय",
+        mode: "मोड",
+        duration: "अवधि"
     },
     selectDateTime: "दिनांक और समय चुनें",
     sessionDetails: "सत्र विवरण",
@@ -221,6 +276,8 @@ const translations = {
   }
 };
 
+
+// (Existing data arrays remain the same)
 const counselors: Counselor[] = [
   {
     id: 1,
@@ -322,7 +379,7 @@ const emergencyContacts = [
   }
 ];
 
-const myBookings = [
+const myBookings: Booking[] = [
   {
     id: 1,
     counselor: "Dr. Priya Sharma",
@@ -330,7 +387,8 @@ const myBookings = [
     time: "2:00 PM",
     type: "Video Call",
     status: "upcoming",
-    sessionId: "sess_001"
+    sessionId: "sess_001",
+    fee: "₹800"
   },
   {
     id: 2,
@@ -339,36 +397,28 @@ const myBookings = [
     time: "4:30 PM",
     type: "Chat",
     status: "completed",
-    sessionId: "sess_002"
+    sessionId: "sess_002",
+    fee: "₹600"
   }
 ];
 
-export default function BookingScreen({ language, setLanguage }: BookingScreenProps) {
-  const t = translations[language as keyof typeof translations];
-  const [activeTab, setActiveTab] = useState('individual');
-  const [selectedCounselor, setSelectedCounselor] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterSpecialty, setFilterSpecialty] = useState('all');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedSessionType, setSelectedSessionType] = useState<string>('');
-  const [showBookingFlow, setShowBookingFlow] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isBooked, setIsBooked] = useState(false);
 
-  const timeSlots = [
-    "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
-    "11:00 AM", "11:30 AM", "02:00 PM", "02:30 PM",
-    "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM",
-    "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM"
-  ];
+export default function BookingScreen({ language, setLanguage }: BookingScreenProps) {
+    const t = translations[language as keyof typeof translations];
+    const [activeTab, setActiveTab] = useState('individual');
+    const [selectedCounselor, setSelectedCounselor] = useState<number | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterSpecialty, setFilterSpecialty] = useState('all');
+    const [showBookingFlow, setShowBookingFlow] = useState(false);
+    const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
+
 
   const getSessionTypeIcon = (type: string) => {
     switch (type) {
-      case 'video': return Video;
-      case 'phone': return Phone;
-      case 'chat': return MessageSquare;
-      case 'inPerson': return MapPin;
+      case 'Video Call': return Video;
+      case 'Phone Call': return Phone;
+      case 'Chat': return MessageSquare;
+      case 'In-Person': return MapPin;
       default: return Video;
     }
   };
@@ -386,7 +436,52 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     window.location.href = `tel:${phoneNumber}`;
   };
 
-  const CounselorCard = ({ counselor }: { counselor: Counselor }) => (
+    const handleDownloadInvoice = (booking: Booking) => {
+    const counselor = counselors.find(c => c.name === booking.counselor);
+    const invoiceContent = `
+      Mind Care - Session Invoice
+      ================================
+
+      Booking ID: ${booking.sessionId}
+      Status: ${booking.status.toUpperCase()}
+
+      Patient Details:
+      Name: Samir Shaw (Example User)
+      Email: samirshaw@example.com
+
+      Counselor Details:
+      Name: ${booking.counselor}
+      Title: ${counselor?.title || 'Counselor'}
+
+      Session Details:
+      Date: ${booking.date}
+      Time: ${booking.time}
+      Mode: ${booking.type}
+      Duration: 50 minutes
+
+      Billing Details:
+      ---------------------------------
+      Session Fee: ${booking.fee}
+      Discount: -₹0
+      ---------------------------------
+      Total Paid: ${booking.fee}
+      ---------------------------------
+
+      Thank you for choosing Mind Care.
+    `;
+
+    const blob = new Blob([invoiceContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `invoice-${booking.sessionId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const CounselorCard: React.FC<CounselorCardProps> = ({ counselor }) => (
     <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
       <CardHeader className="pb-4">
         <div className="flex items-start space-x-4">
@@ -485,7 +580,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     </Card>
   );
 
-  const GroupSessionCard = ({ session }: { session: GroupSession }) => (
+  const GroupSessionCard: React.FC<GroupSessionCardProps> = ({ session }) => (
     <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -708,71 +803,127 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
 
           {/* My Bookings Tab */}
           <TabsContent value="myBookings" className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-3xl font-bold text-gray-800">{t.myBookings.title}</h2>
-              <p className="text-lg text-gray-600">{t.myBookings.subtitle}</p>
-            </div>
+            {viewingBooking ? (
+                 <div className="space-y-6">
+                    <Button variant="outline" onClick={() => setViewingBooking(null)} className="rounded-xl">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        {t.bookingDetails.back}
+                    </Button>
+                    <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm">
+                        <CardHeader>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <CardTitle className="text-2xl font-bold text-gray-800">{t.bookingDetails.title}</CardTitle>
+                                    <CardDescription>Booking ID: {viewingBooking.sessionId}</CardDescription>
+                                </div>
+                                <Badge className={
+                                    viewingBooking.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                    viewingBooking.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-red-100 text-red-700'
+                                }>{viewingBooking.status}</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
 
-            <div className="space-y-4">
-              {myBookings.map((booking) => (
-                <Card key={booking.id} className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="w-12 h-12">
-                          <AvatarFallback className="text-white font-bold"
-                                         style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
-                            {booking.counselor.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-bold text-gray-800">{booking.counselor}</div>
-                          <div className="text-gray-600">{booking.date} at {booking.time}</div>
-                          <div className="text-sm text-gray-500">{booking.type}</div>
-                        </div>
-                      </div>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 className="font-semibold mb-2 flex items-center"><User className="w-4 h-4 mr-2"/>{t.bookingDetails.counselorInfo}</h3>
+                                    <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl">
+                                        <Avatar className="w-12 h-12">
+                                            <AvatarFallback className="text-white font-bold" style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
+                                                {viewingBooking.counselor.split(' ').map((n: string) => n[0]).join('')}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-bold">{viewingBooking.counselor}</p>
+                                            <p className="text-sm text-gray-500">{counselors.find(c => c.name === viewingBooking.counselor)?.title}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div>
+                                    <h3 className="font-semibold mb-2 flex items-center"><User className="w-4 h-4 mr-2"/>{t.bookingDetails.patientInfo}</h3>
+                                    <div className="p-4 bg-gray-50 rounded-2xl space-y-2 h-full flex flex-col justify-center">
+                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Name:</span> <span className="font-medium">Samir Shaw (Example)</span></div>
+                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Email:</span> <span className="font-medium">samirshaw@example.com</span></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                      <div className="flex space-x-2">
-                        {booking.status === 'upcoming' ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-2xl"
-                              onClick={() => {
-                                const counselorToReschedule = counselors.find(c => c.name === booking.counselor);
-                                if (counselorToReschedule) {
-                                  setSelectedCounselor(counselorToReschedule.id);
-                                  setShowBookingFlow(true);
-                                }
-                              }}
-                            >
-                              {t.myBookings.reschedule}
+                            <Separator/>
+
+                             <div>
+                                <h3 className="font-semibold mb-2 flex items-center"><FileText className="w-4 h-4 mr-2"/>{t.bookingDetails.bookingInfo}</h3>
+                                <div className="p-4 bg-gray-50 rounded-2xl space-y-2">
+                                    <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.date}:</span> <span className="font-medium">{viewingBooking.date}</span></div>
+                                    <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.time}:</span> <span className="font-medium">{viewingBooking.time}</span></div>
+                                    <div className="flex justify-between text-sm items-center"><span className="text-gray-500">{t.bookingDetails.mode}:</span> <span className="font-medium flex items-center gap-2">{React.createElement(getSessionTypeIcon(viewingBooking.type), {className: "w-4 h-4"})} {viewingBooking.type}</span></div>
+                                    <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.duration}:</span> <span className="font-medium">50 minutes</span></div>
+                                </div>
+                            </div>
+
+                             <div>
+                                <h3 className="font-semibold mb-2 flex items-center"><CreditCard className="w-4 h-4 mr-2"/>{t.bookingDetails.priceDetails}</h3>
+                                <div className="p-4 bg-gray-50 rounded-2xl space-y-2">
+                                     <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.listingPrice}:</span> <span>{viewingBooking.fee}</span></div>
+                                    <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.discount}:</span> <span className="text-green-600">-₹0</span></div>
+                                    <Separator/>
+                                    <div className="flex justify-between font-bold"><span >{t.bookingDetails.total}:</span> <span>{viewingBooking.fee}</span></div>
+                                </div>
+                            </div>
+
+                            <Button onClick={() => handleDownloadInvoice(viewingBooking)} className="w-full rounded-2xl">
+                                <Download className="w-4 h-4 mr-2" />
+                                {t.bookingDetails.downloadInvoice}
                             </Button>
-                            <Button
-                              size="sm"
-                              className="rounded-2xl text-white"
-                              style={{ background: 'linear-gradient(135deg, #34C759 0%, #4A90E2 100%)' }}
-                            >
-                              {t.myBookings.join}
-                            </Button>
-                          </>
-                        ) : (
-                          <Badge className="rounded-full bg-gray-100 text-gray-600">
-                            Completed
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {!myBookings.length && (
-                <div className="text-center py-10">
-                  <p className="text-gray-500">You have no bookings.</p>
+                        </CardContent>
+                    </Card>
+                 </div>
+            ) : (
+                <>
+                <div className="text-center space-y-3">
+                  <h2 className="text-3xl font-bold text-gray-800">{t.myBookings.title}</h2>
+                  <p className="text-lg text-gray-600">{t.myBookings.subtitle}</p>
                 </div>
-              )}
-            </div>
+
+                <div className="space-y-4">
+                  {myBookings.map((booking) => (
+                    <Card key={booking.id} className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm cursor-pointer hover:shadow-xl transition-shadow" onClick={() => setViewingBooking(booking)}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <Avatar className="w-12 h-12">
+                              <AvatarFallback className="text-white font-bold"
+                                             style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
+                                {booking.counselor.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-bold text-gray-800">{booking.counselor}</div>
+                              <div className="text-gray-600">{booking.date} at {booking.time}</div>
+                              <div className="text-sm text-gray-500">{booking.type}</div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            {booking.status === 'upcoming' ? (
+                               <Badge className="bg-blue-100 text-blue-700">{t.myBookings.upcoming}</Badge>
+                            ) : (
+                              <Badge className="bg-gray-100 text-gray-600">{t.myBookings.past}</Badge>
+                            )}
+                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {!myBookings.length && (
+                    <div className="text-center py-10">
+                      <p className="text-gray-500">You have no bookings.</p>
+                    </div>
+                  )}
+                </div>
+                </>
+            )}
           </TabsContent>
         </Tabs>
       </div>
