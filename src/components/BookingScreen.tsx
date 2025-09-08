@@ -30,9 +30,9 @@ import {
   Calendar as CalIcon,
   Download,
   ArrowLeft,
-  ChevronRight,
   FileText,
-  CreditCard
+  CreditCard,
+  ChevronRight
 } from 'lucide-react';
 
 interface BookingScreenProps {
@@ -276,8 +276,6 @@ const translations = {
   }
 };
 
-
-// (Existing data arrays remain the same)
 const counselors: Counselor[] = [
   {
     id: 1,
@@ -436,7 +434,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     window.location.href = `tel:${phoneNumber}`;
   };
 
-    const handleDownloadInvoice = (booking: Booking) => {
+  const handleDownloadInvoice = (booking: Booking) => {
     const counselor = counselors.find(c => c.name === booking.counselor);
     const invoiceContent = `
       Mind Care - Session Invoice
@@ -870,11 +868,14 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
                                     <div className="flex justify-between font-bold"><span >{t.bookingDetails.total}:</span> <span>{viewingBooking.fee}</span></div>
                                 </div>
                             </div>
+                            
+                            {viewingBooking.status === 'completed' && (
+                                <Button onClick={() => handleDownloadInvoice(viewingBooking)} className="w-full rounded-2xl">
+                                    <Download className="w-4 h-4 mr-2" />
+                                    {t.bookingDetails.downloadInvoice}
+                                </Button>
+                            )}
 
-                            <Button onClick={() => handleDownloadInvoice(viewingBooking)} className="w-full rounded-2xl">
-                                <Download className="w-4 h-4 mr-2" />
-                                {t.bookingDetails.downloadInvoice}
-                            </Button>
                         </CardContent>
                     </Card>
                  </div>
