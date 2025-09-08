@@ -10,11 +10,11 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import MultiStepBookingScreen from './MultiStepBookingScreen';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Video, 
-  MessageSquare, 
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Video,
+  MessageSquare,
   Phone,
   Star,
   MapPin,
@@ -40,13 +40,43 @@ interface BookingScreenProps {
   setLanguage?: (lang: string) => void;
 }
 
+// Type definitions for our data
+interface Counselor {
+  id: number;
+  name: string;
+  title: string;
+  rating: number;
+  experience: string;
+  languages: string[];
+  specializations: string[];
+  fee: string;
+  nextAvailable: string;
+  image: string;
+  sessionTypes: string[];
+  verified: boolean;
+  bio: string;
+}
+
+interface GroupSession {
+  id: number;
+  title: string;
+  facilitator: string;
+  date: string;
+  duration: string;
+  participants: number;
+  maxParticipants: number;
+  fee: string;
+  description: string;
+}
+
+
 const translations = {
   en: {
     title: "Book Counseling Sessions",
     subtitle: "Connect with licensed mental health professionals",
     tabs: {
       individual: "Individual Therapy",
-      group: "Group Sessions", 
+      group: "Group Sessions",
       emergency: "Emergency Support",
       myBookings: "My Bookings"
     },
@@ -86,7 +116,7 @@ const translations = {
     bookingConfirm: "Confirm Booking",
     sessionTypes: {
       video: "Video Call",
-      phone: "Phone Call", 
+      phone: "Phone Call",
       chat: "Text Chat",
       inPerson: "In-Person"
     },
@@ -191,7 +221,7 @@ const translations = {
   }
 };
 
-const counselors = [
+const counselors: Counselor[] = [
   {
     id: 1,
     name: "Dr. Priya Sharma",
@@ -225,7 +255,7 @@ const counselors = [
   {
     id: 3,
     name: "Dr. Anita Patel",
-    title: "Counseling Psychologist", 
+    title: "Counseling Psychologist",
     rating: 4.7,
     experience: "6 years",
     languages: ["English", "Hindi", "Gujarati"],
@@ -239,7 +269,7 @@ const counselors = [
   }
 ];
 
-const groupSessions = [
+const groupSessions: GroupSession[] = [
   {
     id: 1,
     title: "Anxiety Support Group",
@@ -346,13 +376,17 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
   const filteredCounselors = counselors.filter(counselor => {
     const matchesSearch = counselor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          counselor.specializations.some(spec => spec.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesFilter = filterSpecialty === 'all' || counselor.specializations.some(spec => 
+    const matchesFilter = filterSpecialty === 'all' || counselor.specializations.some(spec =>
       spec.toLowerCase().includes(filterSpecialty.toLowerCase()));
-    
+
     return matchesSearch && matchesFilter;
   });
 
-  const CounselorCard = ({ counselor }: { counselor: any }) => (
+  const handleCallNow = (phoneNumber: string) => {
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
+  const CounselorCard = ({ counselor }: { counselor: Counselor }) => (
     <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
       <CardHeader className="pb-4">
         <div className="flex items-start space-x-4">
@@ -362,7 +396,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
               {counselor.image}
             </AvatarFallback>
           </Avatar>
-          
+
           <div className="flex-1">
             <div className="flex items-center space-x-2">
               <CardTitle className="text-xl font-bold text-gray-800">{counselor.name}</CardTitle>
@@ -374,7 +408,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
               )}
             </div>
             <CardDescription className="text-gray-600 font-medium">{counselor.title}</CardDescription>
-            
+
             <div className="flex items-center space-x-4 mt-3">
               <div className="flex items-center space-x-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -389,17 +423,17 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
               </Badge>
             </div>
           </div>
-          
+
           <div className="text-right">
             <div className="text-2xl font-bold" style={{ color: '#E4004B' }}>{counselor.fee}</div>
             <div className="text-sm text-gray-500">per session</div>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0 space-y-4">
         <p className="text-gray-600 leading-relaxed">{counselor.bio}</p>
-        
+
         <div>
           <div className="font-bold text-gray-800 mb-2">{t.specializations}</div>
           <div className="flex flex-wrap gap-2">
@@ -410,13 +444,13 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div>
             <div className="font-bold text-gray-800">{t.nextAvailable}</div>
             <div className="font-medium" style={{ color: '#E4004B' }}>{counselor.nextAvailable}</div>
           </div>
-          
+
           <div className="flex space-x-2">
             {counselor.sessionTypes.map((type: string) => {
               const Icon = getSessionTypeIcon(type);
@@ -428,15 +462,15 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
             })}
           </div>
         </div>
-        
+
         <div className="flex space-x-3 pt-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex-1 rounded-2xl font-bold border-gray-300 hover:bg-gray-50"
           >
             {t.individual.viewProfile}
           </Button>
-          <Button 
+          <Button
             className="flex-1 rounded-2xl font-bold text-white shadow-lg"
             style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}
             onClick={() => {
@@ -451,7 +485,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     </Card>
   );
 
-  const GroupSessionCard = ({ session }: { session: any }) => (
+  const GroupSessionCard = ({ session }: { session: GroupSession }) => (
     <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -462,7 +496,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
         </div>
         <CardDescription className="text-gray-600">{session.description}</CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -474,14 +508,14 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
             <div className="text-gray-600">{session.duration}</div>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div>
             <div className="font-bold text-gray-800">{session.date}</div>
             <div className="text-2xl font-bold" style={{ color: '#E4004B' }}>{session.fee}</div>
           </div>
-          
-          <Button 
+
+          <Button
             className="rounded-2xl font-bold text-white shadow-lg"
             style={{ background: 'linear-gradient(135deg, #4A90E2 0%, #34C759 100%)' }}
             disabled={session.participants >= session.maxParticipants}
@@ -523,7 +557,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
               <CalendarIcon className="w-10 h-10 text-white" />
             </div>
           </div>
-          
+
           <div className="space-y-3">
             <h1 className="text-5xl font-bold text-gray-800">
               {t.title}
@@ -548,32 +582,32 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 rounded-3xl bg-gray-100/80 p-2 h-auto">
-            <TabsTrigger 
-              value="individual" 
+            <TabsTrigger
+              value="individual"
               className="rounded-2xl font-bold py-3 data-[state=active]:text-white"
               style={activeTab === 'individual' ? { background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' } : {}}
             >
               <Heart className="w-4 h-4 mr-2" />
               {t.tabs.individual}
             </TabsTrigger>
-            <TabsTrigger 
-              value="group" 
+            <TabsTrigger
+              value="group"
               className="rounded-2xl font-bold py-3 data-[state=active]:text-white"
               style={activeTab === 'group' ? { background: 'linear-gradient(135deg, #4A90E2 0%, #34C759 100%)' } : {}}
             >
               <Users className="w-4 h-4 mr-2" />
               {t.tabs.group}
             </TabsTrigger>
-            <TabsTrigger 
-              value="emergency" 
+            <TabsTrigger
+              value="emergency"
               className="rounded-2xl font-bold py-3 data-[state=active]:text-white"
               style={activeTab === 'emergency' ? { background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8A65 100%)' } : {}}
             >
               <Zap className="w-4 h-4 mr-2" />
               {t.tabs.emergency}
             </TabsTrigger>
-            <TabsTrigger 
-              value="myBookings" 
+            <TabsTrigger
+              value="myBookings"
               className="rounded-2xl font-bold py-3 data-[state=active]:text-white"
               style={activeTab === 'myBookings' ? { background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' } : {}}
             >
@@ -659,9 +693,10 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
                     <div className="text-2xl font-bold" style={{ color: '#FF6B6B' }}>
                       {contact.phone}
                     </div>
-                    <Button 
+                    <Button
                       className="w-full rounded-2xl font-bold text-white shadow-lg"
                       style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8A65 100%)' }}
+                      onClick={() => handleCallNow(contact.phone)}
                     >
                       {t.emergency.callNow}
                     </Button>
@@ -696,19 +731,26 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
                           <div className="text-sm text-gray-500">{booking.type}</div>
                         </div>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         {booking.status === 'upcoming' ? (
                           <>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="rounded-2xl"
+                              onClick={() => {
+                                const counselorToReschedule = counselors.find(c => c.name === booking.counselor);
+                                if (counselorToReschedule) {
+                                  setSelectedCounselor(counselorToReschedule.id);
+                                  setShowBookingFlow(true);
+                                }
+                              }}
                             >
                               {t.myBookings.reschedule}
                             </Button>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="rounded-2xl text-white"
                               style={{ background: 'linear-gradient(135deg, #34C759 0%, #4A90E2 100%)' }}
                             >
@@ -725,6 +767,11 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
                   </CardContent>
                 </Card>
               ))}
+              {!myBookings.length && (
+                <div className="text-center py-10">
+                  <p className="text-gray-500">You have no bookings.</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
