@@ -12,7 +12,7 @@ interface OnboardingScreenProps {
 
 const translations = {
   en: {
-    welcome: "Welcome to Mind Care",
+    welcome: "Welcome to NIVI TO NEW BEGINNINGS",
     subtitle: "Your safe space for mental health and wellbeing",
     description: "We're here to support you on your mental health journey with evidence-based tools, confidential counseling, and a stigma-free environment.",
     features: [
@@ -30,7 +30,7 @@ const translations = {
     languageLabel: "Choose Language"
   },
   hi: {
-    welcome: "मानसिक स्वास्थ्य में आपका स्वागत है",
+    welcome: "NIVI TO NEW BEGINNINGS में आपका स्वागत है",
     subtitle: "मानसिक स्वास्थ्य और कल्याण के लिए आपका सुरक्षित स्थान",
     description: "हम प्रमाण-आधारित उपकरण, गोपनीय परामर्श और कलंक-मुक्त वातावरण के साथ आपकी मानसिक स्वास्थ्य यात्रा में आपका समर्थन करने के लिए यहाँ हैं।",
     features: [
