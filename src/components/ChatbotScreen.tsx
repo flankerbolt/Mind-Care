@@ -45,7 +45,7 @@ const translations = {
       sad: "I'm feeling sad",
       stress: "I'm stressed about school"
     },
-    botName: "Mind Care AI",
+    botName: "NIVI",
     safetyPrompt: "I notice you might be going through a difficult time. Your safety is important. Would you like me to connect you with a crisis counselor?",
     connectCounselor: "Connect with Counselor",
     continueChat: "Continue Chatting"
@@ -65,7 +65,7 @@ const translations = {
       sad: "मैं उदास महसूस कर रहा हूँ",
       stress: "मैं स्कूल को लेकर तनावग्रस्त हूँ"
     },
-    botName: "Mind Care AI",
+    botName: "NIVI",
     safetyPrompt: "मैं देख रहा हूँ कि आप एक कठिन समय से गुजर रहे हैं। आपकी सुरक्षा महत्वपूर्ण है। क्या आप चाहेंगे कि मैं आपको संकट परामर्शदाता से जोड़ूं?",
     connectCounselor: "परामर्शदाता से जुड़ें",
     continueChat: "चैट जारी रखें"
@@ -73,8 +73,8 @@ const translations = {
 };
 
 const initialBotMessage = {
-  en: "Hello! I'm Mind Care AI, here to provide you with mental health support and guidance. How are you feeling today? Remember, I'm here to listen and help you with coping strategies.",
-  hi: "नमस्ते! मैं Mind Care AI हूँ, आपको मानसिक स्वास्थ्य सहायता और मार्गदर्शन प्रदान करने के लिए यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं? याद रखें, मैं सुनने और मुकाबला रणनीतियों में आपकी मदद करने के लिए यहाँ हूँ।"
+  en: "Hello! I'm NIVI, here to provide you with mental health support and guidance. How are you feeling today? Remember, I'm here to listen and help you with coping strategies.",
+  hi: "नमस्ते! मैं NIVI हूँ, आपको मानसिक स्वास्थ्य सहायता और मार्गदर्शन प्रदान करने के लिए यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं? याद रखें, मैं सुनने और मुकाबला रणनीतियों में आपकी मदद करने के लिए यहाँ हूँ।"
 };
 
 const crisisKeywords = ['suicide', 'kill myself', 'end it all', 'not worth living', 'hurt myself', 'die', 'मरना चाहता हूँ', 'आत्महत्या', 'जीने का मन नहीं'];

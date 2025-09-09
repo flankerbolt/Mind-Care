@@ -26,9 +26,9 @@ interface LoginScreenProps {
 
 const translations = {
   en: {
-    welcome: "Welcome to Mind Care",
-    subtitle: "Your safe space for mental wellness",
-    description: "Join thousands of students who trust Mind Care for confidential mental health support.",
+    welcome: "Welcome to NIVI",
+    subtitle: "To New Beginnings - Your safe space for mental wellness",
+    description: "Join thousands of students who trust NIVI for confidential mental health support.",
     login: "Sign In",
     register: "Create Account",
     email: "Email Address",
@@ -67,9 +67,9 @@ const translations = {
     }
   },
   hi: {
-    welcome: "Mind Care में आपका स्वागत है",
-    subtitle: "मानसिक स्वास्थ्य के लिए आपका सुरक्षित स्थान",
-    description: "हजारों छात्रों में शामिल हों जो गोपनीय मानसिक स्वास्थ्य सहायता के लिए Mind Care पर भरोसा करते हैं।",
+    welcome: "NIVI में आपका स्वागत है",
+    subtitle: "नई शुरुआत के लिए - मानसिक स्वास्थ्य के लिए आपका सुरक्षित स्थान",
+    description: "हजारों छात्रों में शामिल हों जो गोपनीय मानसिक स्वास्थ्य सहायता के लिए NIVI पर भरोसा करते हैं।",
     login: "साइन इन करें",
     register: "खाता बनाएं",
     email: "ईमेल पता",

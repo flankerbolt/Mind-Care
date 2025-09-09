@@ -9,6 +9,13 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import MultiStepBookingScreen from './MultiStepBookingScreen';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
+import {
   Calendar as CalendarIcon,
   Clock,
   Video,
@@ -49,7 +56,6 @@ interface Counselor {
   experience: string;
   languages: string[];
   specializations: string[];
-  fee: string;
   nextAvailable: string;
   image: string;
   sessionTypes: string[];
@@ -82,6 +88,7 @@ interface Booking {
 
 interface CounselorCardProps {
   counselor: Counselor;
+  onViewProfile: (counselor: Counselor) => void;
 }
 
 interface GroupSessionCardProps {
@@ -285,7 +292,6 @@ const counselors: Counselor[] = [
     experience: "8 years",
     languages: ["English", "Hindi", "Marathi"],
     specializations: ["Anxiety", "Depression", "Student Counseling"],
-    fee: "₹800",
     nextAvailable: "Today, 2:00 PM",
     image: "PS",
     sessionTypes: ["video", "phone", "chat"],
@@ -300,7 +306,6 @@ const counselors: Counselor[] = [
     experience: "12 years",
     languages: ["English", "Hindi"],
     specializations: ["Trauma", "PTSD", "Mood Disorders"],
-    fee: "₹1200",
     nextAvailable: "Tomorrow, 10:00 AM",
     image: "RK",
     sessionTypes: ["video", "phone", "inPerson"],
@@ -315,7 +320,6 @@ const counselors: Counselor[] = [
     experience: "6 years",
     languages: ["English", "Hindi", "Gujarati"],
     specializations: ["Stress Management", "Relationship Issues", "Career Counseling"],
-    fee: "₹600",
     nextAvailable: "Today, 4:30 PM",
     image: "AP",
     sessionTypes: ["video", "chat"],
@@ -400,6 +404,36 @@ const myBookings: Booking[] = [
   }
 ];
 
+const CounselorProfileModal = ({ counselor, onClose }: { counselor: Counselor | null; onClose: () => void; }) => {
+    if (!counselor) return null;
+
+    return (
+        <Dialog open={!!counselor} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{counselor.name}</DialogTitle>
+                    <DialogDescription>{counselor.title}</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <p>{counselor.bio}</p>
+                    <div>
+                        <strong>Specializations:</strong> {counselor.specializations.join(', ')}
+                    </div>
+                    <div>
+                        <strong>Languages:</strong> {counselor.languages.join(', ')}
+                    </div>
+                    <div>
+                        <strong>Experience:</strong> {counselor.experience}
+                    </div>
+                    <div>
+                        <strong>Rating:</strong> {counselor.rating}
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function BookingScreen({ language, setLanguage }: BookingScreenProps) {
     const t = translations[language as keyof typeof translations];
@@ -409,6 +443,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     const [filterSpecialty, setFilterSpecialty] = useState('all');
     const [showBookingFlow, setShowBookingFlow] = useState(false);
     const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
+    const [viewingProfile, setViewingProfile] = useState<Counselor | null>(null);
 
 
   const getSessionTypeIcon = (type: string) => {
@@ -437,7 +472,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
   const handleDownloadInvoice = (booking: Booking) => {
     const counselor = counselors.find(c => c.name === booking.counselor);
     const invoiceContent = `
-      Mind Care - Session Invoice
+      NIVI TO NEW BEGINNINGS - Session Invoice
       ================================
 
       Booking ID: ${booking.sessionId}
@@ -465,7 +500,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
       Total Paid: ${booking.fee}
       ---------------------------------
 
-      Thank you for choosing Mind Care.
+      Thank you for choosing NIVI TO NEW BEGINNINGS.
     `;
 
     const blob = new Blob([invoiceContent], { type: 'text/plain;charset=utf-8' });
@@ -479,7 +514,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
     URL.revokeObjectURL(url);
   };
 
-  const CounselorCard: React.FC<CounselorCardProps> = ({ counselor }) => (
+  const CounselorCard: React.FC<CounselorCardProps> = ({ counselor, onViewProfile }) => (
     <Card className="rounded-3xl border-none shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
       <CardHeader className="pb-4">
         <div className="flex items-start space-x-4">
@@ -516,11 +551,6 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
               </Badge>
             </div>
           </div>
-
-          <div className="text-right">
-            <div className="text-2xl font-bold" style={{ color: '#E4004B' }}>{counselor.fee}</div>
-            <div className="text-sm text-gray-500">per session</div>
-          </div>
         </div>
       </CardHeader>
 
@@ -546,7 +576,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
 
           <div className="flex space-x-2">
             {counselor.sessionTypes.map((type: string) => {
-              const Icon = getSessionTypeIcon(type);
+              const Icon = getSessionTypeIcon(t.sessionTypes[type as keyof typeof t.sessionTypes]);
               return (
                 <div key={type} className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center shadow-sm">
                   <Icon className="w-5 h-5 text-gray-600" />
@@ -560,6 +590,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
           <Button
             variant="outline"
             className="flex-1 rounded-2xl font-bold border-gray-300 hover:bg-gray-50"
+            onClick={() => onViewProfile(counselor)}
           >
             {t.individual.viewProfile}
           </Button>
@@ -641,6 +672,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
 
   return (
     <div className="min-h-screen pb-20" style={{ background: 'linear-gradient(135deg, #FDF2F8 0%, #ffffff 50%, #F0F9FF 100%)' }}>
+      <CounselorProfileModal counselor={viewingProfile} onClose={() => setViewingProfile(null)} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-6">
@@ -745,7 +777,7 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
             {/* Counselors Grid */}
             <div className="grid lg:grid-cols-2 gap-8">
               {filteredCounselors.map((counselor) => (
-                <CounselorCard key={counselor.id} counselor={counselor} />
+                <CounselorCard key={counselor.id} counselor={counselor} onViewProfile={setViewingProfile} />
               ))}
             </div>
           </TabsContent>

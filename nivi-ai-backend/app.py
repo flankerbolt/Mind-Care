@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai # <-- YEH LINE BADLI HAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 custom_responses = {
-    "what is your name": "My name is NIVI AIGPT 🙂",
+    "what is your name": "My name is NIVI 🙂",
     "who made you": """I was created by my amazing team:
 
 Archisman Karmakar (Frontend Engineer, Team Lead)
@@ -36,7 +36,6 @@ def chatbot_response(user_input):
             return custom_responses[key]
 
     try:
-        # Model ko initialize karne ka naya tareeka
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(user_input)
         return response.text

@@ -24,7 +24,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const screens = {
-    login: <LoginScreen 
+    login: <LoginScreen
       onLogin={() => {
         setIsLoggedIn(true);
         setCurrentScreen('onboarding');
@@ -37,8 +37,8 @@ export default function App() {
       setAssessmentResults(results);
       setCurrentScreen('results');
     }} language={language} />,
-    results: <ResultsScreen 
-      results={assessmentResults} 
+    results: <ResultsScreen
+      results={assessmentResults}
       onSelfHelp={() => setCurrentScreen('selfhelp')}
       onBooking={() => setCurrentScreen('booking')}
       onChatbot={() => setCurrentScreen('chatbot')}
@@ -81,7 +81,7 @@ export default function App() {
                    style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
                 <Heart className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-800">Mind Care</h1>
+              <h1 className="text-2xl font-bold text-gray-800">NIVI TO NEW BEGINNINGS</h1>
               {isLoggedIn && (
                 <div className="hidden md:flex items-center space-x-2 ml-4">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
