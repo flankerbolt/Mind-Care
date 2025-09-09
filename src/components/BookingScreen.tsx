@@ -83,7 +83,6 @@ interface Booking {
     type: string;
     status: "upcoming" | "completed" | "cancelled";
     sessionId: string;
-    fee: string;
 }
 
 interface CounselorCardProps {
@@ -390,7 +389,6 @@ const myBookings: Booking[] = [
     type: "Video Call",
     status: "upcoming",
     sessionId: "sess_001",
-    fee: "₹800"
   },
   {
     id: 2,
@@ -400,7 +398,6 @@ const myBookings: Booking[] = [
     type: "Chat",
     status: "completed",
     sessionId: "sess_002",
-    fee: "₹600"
   }
 ];
 
@@ -491,14 +488,6 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
       Time: ${booking.time}
       Mode: ${booking.type}
       Duration: 50 minutes
-
-      Billing Details:
-      ---------------------------------
-      Session Fee: ${booking.fee}
-      Discount: -₹0
-      ---------------------------------
-      Total Paid: ${booking.fee}
-      ---------------------------------
 
       Thank you for choosing NIVI TO NEW BEGINNINGS.
     `;
@@ -888,16 +877,6 @@ export default function BookingScreen({ language, setLanguage }: BookingScreenPr
                                     <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.time}:</span> <span className="font-medium">{viewingBooking.time}</span></div>
                                     <div className="flex justify-between text-sm items-center"><span className="text-gray-500">{t.bookingDetails.mode}:</span> <span className="font-medium flex items-center gap-2">{React.createElement(getSessionTypeIcon(viewingBooking.type), {className: "w-4 h-4"})} {viewingBooking.type}</span></div>
                                     <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.duration}:</span> <span className="font-medium">50 minutes</span></div>
-                                </div>
-                            </div>
-
-                             <div>
-                                <h3 className="font-semibold mb-2 flex items-center"><CreditCard className="w-4 h-4 mr-2"/>{t.bookingDetails.priceDetails}</h3>
-                                <div className="p-4 bg-gray-50 rounded-2xl space-y-2">
-                                     <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.listingPrice}:</span> <span>{viewingBooking.fee}</span></div>
-                                    <div className="flex justify-between text-sm"><span className="text-gray-500">{t.bookingDetails.discount}:</span> <span className="text-green-600">-₹0</span></div>
-                                    <Separator/>
-                                    <div className="flex justify-between font-bold"><span >{t.bookingDetails.total}:</span> <span>{viewingBooking.fee}</span></div>
                                 </div>
                             </div>
                             

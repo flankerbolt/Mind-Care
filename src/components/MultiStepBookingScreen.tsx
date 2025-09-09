@@ -199,7 +199,6 @@ const counselors = [
     experience: "8 years",
     languages: ["English", "Hindi", "Marathi"],
     specializations: ["Anxiety", "Depression", "Student Counseling"],
-    fee: "₹800",
     nextAvailable: "Today, 2:00 PM",
     image: "PS",
     sessionTypes: ["video", "phone", "chat"],
@@ -214,7 +213,6 @@ const counselors = [
     experience: "12 years",
     languages: ["English", "Hindi"],
     specializations: ["Trauma", "PTSD", "Mood Disorders"],
-    fee: "₹1200",
     nextAvailable: "Tomorrow, 10:00 AM",
     image: "RK",
     sessionTypes: ["video", "phone", "inPerson"],
@@ -229,7 +227,6 @@ const counselors = [
     experience: "6 years",
     languages: ["English", "Hindi", "Gujarati"],
     specializations: ["Stress Management", "Relationship Issues", "Career Counseling"],
-    fee: "₹600",
     nextAvailable: "Today, 4:30 PM",
     image: "AP",
     sessionTypes: ["video", "chat"],
@@ -472,13 +469,6 @@ export default function MultiStepBookingScreen({
                             </Badge>
                           </div>
                         </div>
-                        
-                        <div className="text-right">
-                          <div className="text-3xl font-bold" style={{ color: '#E4004B' }}>
-                            {selectedCounselor.fee}
-                          </div>
-                          <div className="text-sm text-gray-500">per session</div>
-                        </div>
                       </div>
                     </div>
 
@@ -706,14 +696,6 @@ export default function MultiStepBookingScreen({
                           <span className="font-bold text-gray-800">50 {t.minutes}</span>
                         </div>
                         
-                        <Separator />
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-lg font-bold text-gray-800">{t.step3.fee}:</span>
-                          <span className="text-2xl font-bold" style={{ color: '#E4004B' }}>
-                            {selectedCounselor.fee}
-                          </span>
-                        </div>
                       </div>
 
                       <div className="bg-green-50/50 p-4 rounded-2xl">
