@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from './components/ui/button';
-import { Globe, Heart, Brain, Calendar, BookOpen, MessageCircle, BarChart3, AlertTriangle, Users, LogIn, User } from 'lucide-react';
+import { Globe, Heart, Brain, Calendar, BookOpen, MessageCircle, BarChart3, AlertTriangle, Users, LogIn, User, FileText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip';
 
 // Import all screen components
@@ -80,9 +80,10 @@ export default function App() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'assessment', label: 'Assessment', icon: Brain },
+    { id: 'results', label: 'Result', icon: FileText },
     { id: 'selfhelp', label: 'Resources', icon: BookOpen },
     { id: 'peersupport', label: 'Community', icon: Users },
-    { id: 'booking', label: 'Book Session', icon: Calendar },
+    { id: 'booking', label: 'Booking Session', icon: Calendar },
     { id: 'chatbot', label: 'Chat Support', icon: MessageCircle },
     { id: 'profile', label: 'Profile', icon: User },
   ];
@@ -159,7 +160,7 @@ export default function App() {
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>Emergency Support</p>
+                        <p>SOS</p>
                     </TooltipContent>
                 </Tooltip>
                 
@@ -196,7 +197,7 @@ export default function App() {
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>Change Language</p>
+                        <p>हिन्दी</p>
                     </TooltipContent>
                 </Tooltip>
               </div>
