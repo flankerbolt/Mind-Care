@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from './components/ui/button';
-import { Card } from './components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Globe, Heart, Brain, Calendar, BookOpen, MessageCircle, BarChart3, AlertTriangle, Users, LogIn, User } from 'lucide-react';
 
 // Import all screen components
 import LoginScreen from './components/LoginScreen';
 import OnboardingScreen from './components/OnboardingScreen';
+import UserProfileDashboard from './components/UserProfileDashboard'; // Dashboard import kiya gaya
 import AssessmentScreen from './components/AssessmentScreen';
 import ResultsScreen from './components/ResultsScreen';
 import SelfHelpScreen from './components/SelfHelpScreen';
@@ -22,17 +21,39 @@ export default function App() {
   const [assessmentResults, setAssessmentResults] = useState(null);
   const [language, setLanguage] = useState('en');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // State to track if user has completed onboarding
+  const [hasOnboarded, setHasOnboarded] = useState(false);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    // If user has already onboarded, go to dashboard, else show onboarding
+    if (hasOnboarded) {
+      setCurrentScreen('dashboard');
+    } else {
+      setCurrentScreen('onboarding');
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    setHasOnboarded(true); // Mark onboarding as complete
+    setCurrentScreen('dashboard'); // Navigate to dashboard
+  };
 
   const screens = {
-    login: <LoginScreen 
-      onLogin={() => {
-        setIsLoggedIn(true);
-        setCurrentScreen('onboarding');
-      }}
+    login: <LoginScreen
+      onLogin={handleLogin}
       language={language}
       setLanguage={setLanguage}
     />,
-    onboarding: <OnboardingScreen onNext={() => setCurrentScreen('assessment')} language={language} setLanguage={setLanguage} />,
+    onboarding: <OnboardingScreen 
+      onNext={handleOnboardingComplete} 
+      language={language} 
+      setLanguage={setLanguage} 
+    />,
+    dashboard: <UserProfileDashboard 
+      language={language} 
+      onNavigate={setCurrentScreen}
+    />,
     assessment: <AssessmentScreen onComplete={(results) => {
       setAssessmentResults(results);
       setCurrentScreen('results');
@@ -52,24 +73,25 @@ export default function App() {
     profile: <ProfileScreen language={language} setLanguage={setLanguage} />,
     peersupport: <PeerSupportScreen language={language} />,
     admin: <AdminDashboard />,
-    crisis: <CrisisScreen language={language} setLanguage={setLanguage} onBack={() => setCurrentScreen('onboarding')} />
+    crisis: <CrisisScreen language={language} setLanguage={setLanguage} onBack={() => setCurrentScreen('dashboard')} />
   };
 
   const navigationItems = [
-    { id: 'onboarding', label: 'Welcome', icon: Heart },
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'assessment', label: 'Assessment', icon: Brain },
-    { id: 'results', label: 'Results', icon: BarChart3 },
     { id: 'selfhelp', label: 'Resources', icon: BookOpen },
-    { id: 'chatbot', label: 'Chat Support', icon: MessageCircle },
     { id: 'peersupport', label: 'Community', icon: Users },
     { id: 'booking', label: 'Book Session', icon: Calendar },
+    { id: 'chatbot', label: 'Chat Support', icon: MessageCircle },
     { id: 'profile', label: 'Profile', icon: User },
-    { id: 'admin', label: 'Admin', icon: BarChart3 }
   ];
 
-  // Don't show navigation on login screen
-  if (currentScreen === 'login') {
-    return screens[currentScreen];
+  if (!isLoggedIn || currentScreen === 'login') {
+    return screens.login;
+  }
+  
+  if (!hasOnboarded && currentScreen !== 'login') {
+      return screens.onboarding;
   }
 
   return (
@@ -84,16 +106,14 @@ export default function App() {
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-800">NIVI TO NEW BEGINNINGS</h1>
-              {isLoggedIn && (
-                <div className="hidden md:flex items-center space-x-2 ml-4">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Secure Session</span>
-                </div>
-              )}
+              <div className="hidden md:flex items-center space-x-2 ml-4">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Secure Session</span>
+              </div>
             </div>
             
             <div className="hidden md:flex items-center space-x-1">
-              {navigationItems.slice(0, 7).map((item) => {
+              {navigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Button
@@ -128,30 +148,18 @@ export default function App() {
                 <span className="hidden md:inline">SOS</span>
               </Button>
               
-              {isLoggedIn ? (
-                <Button
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    setCurrentScreen('login');
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2 rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Logout</span>
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setCurrentScreen('login')}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2 rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Login</span>
-                </Button>
-              )}
+              <Button
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  setCurrentScreen('login');
+                }}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2 rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden md:inline">Logout</span>
+              </Button>
               
               <Button
                 variant="outline"
@@ -170,7 +178,7 @@ export default function App() {
       {/* Mobile Navigation */}
       <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-primary/10 fixed bottom-0 left-0 right-0 z-50 shadow-lg">
         <div className="flex justify-around py-3">
-          {[navigationItems[0], navigationItems[2], navigationItems[6], navigationItems[7]].map((item) => {
+          {[navigationItems[0], navigationItems[1], navigationItems[4], navigationItems[6]].map((item) => {
             const Icon = item.icon;
             const isActive = currentScreen === item.id;
             return (
@@ -207,7 +215,7 @@ export default function App() {
 
       {/* Main Content */}
       <main className="pb-20 md:pb-8">
-        {screens[currentScreen]}
+        {screens[currentScreen as keyof typeof screens]}
       </main>
     </div>
   );
