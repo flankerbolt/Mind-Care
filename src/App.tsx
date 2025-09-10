@@ -123,9 +123,9 @@ export default function App() {
                       <TooltipTrigger asChild>
                         <Button
                           variant={currentScreen === item.id ? "default" : "ghost"}
-                          size="sm"
+                          size="icon"
                           onClick={() => setCurrentScreen(item.id)}
-                          className={`flex items-center space-x-2 rounded-2xl font-medium transition-all duration-200 ${
+                          className={`rounded-2xl font-medium transition-all duration-200 ${
                             currentScreen === item.id 
                               ? 'shadow-lg' 
                               : 'hover:bg-gray-100'
@@ -135,7 +135,6 @@ export default function App() {
                           } : {}}
                         >
                           <Icon className="w-4 h-4" />
-                          <span className="hidden lg:inline">{item.label}</span>
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -151,12 +150,11 @@ export default function App() {
                     <TooltipTrigger asChild>
                         <Button
                             onClick={() => setCurrentScreen('crisis')}
-                            size="sm"
-                            className="flex items-center space-x-2 rounded-2xl font-medium text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                            size="icon"
+                            className="rounded-2xl font-medium text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                             style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8A65 100%)' }}
                         >
                             <AlertTriangle className="w-4 h-4" />
-                            <span className="hidden lg:inline">SOS</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -172,11 +170,10 @@ export default function App() {
                             setCurrentScreen('login');
                             }}
                             variant="outline"
-                            size="sm"
-                            className="flex items-center space-x-2 rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
+                            size="icon"
+                            className="rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
                         >
                             <LogIn className="w-4 h-4" />
-                            <span className="hidden lg:inline">Logout</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -188,12 +185,11 @@ export default function App() {
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="sm"
+                            size="icon"
                             onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-                            className="flex items-center space-x-2 rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
+                            className="rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
                         >
                             <Globe className="w-4 h-4" />
-                            <span>{language === 'en' ? 'हिं' : 'EN'}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
