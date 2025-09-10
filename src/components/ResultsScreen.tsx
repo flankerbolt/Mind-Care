@@ -11,8 +11,8 @@ import {
   MessageCircle, 
   Phone, 
   AlertTriangle,
-  CheckCircle,
-  Info
+  FileText,
+  RefreshCw
 } from 'lucide-react';
 
 interface ResultsScreenProps {
@@ -25,6 +25,7 @@ interface ResultsScreenProps {
   onBooking: () => void;
   onChatbot: () => void;
   onCrisis: () => void;
+  onTakeAssessment: () => void;
   language: string;
 }
 
@@ -58,7 +59,14 @@ const translations = {
       level: "Critical",
       tagline: "This is serious. You are not alone — reach out now.",
       insight: "Your results show a critical level of distress. It is highly recommended to seek immediate professional help."
-    }
+    },
+    noResults: {
+      title: "No Results Available",
+      description: "You haven't taken the assessment yet. Take the assessment to get insights into your wellbeing.",
+      button: "Take Assessment Now"
+    },
+    pastResult: "Your Last Assessment",
+    retake: "Retake Assessment"
   },
   hi: {
     title: "आपके मूल्यांकन के परिणाम",
@@ -89,7 +97,14 @@ const translations = {
       level: "गंभीर",
       tagline: "यह गंभीर है। आप अकेले नहीं हैं — अभी संपर्क करें।",
       insight: "आपके परिणाम संकट का एक गंभीर स्तर दिखाते हैं। तत्काल पेशेवर मदद लेने की अत्यधिक अनुशंसा की जाती है।"
-    }
+    },
+    noResults: {
+      title: "कोई परिणाम उपलब्ध नहीं",
+      description: "आपने अभी तक मूल्यांकन नहीं किया है। अपनी भलाई के बारे में जानकारी प्राप्त करने के लिए मूल्यांकन करें।",
+      button: "अभी मूल्यांकन करें"
+    },
+    pastResult: "आपका पिछला मूल्यांकन",
+    retake: "फिर से मूल्यांकन करें"
   }
 };
 
@@ -108,19 +123,49 @@ const getLevelColor = (level: string) => {
   }
 };
 
-export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbot, onCrisis, language }: ResultsScreenProps) {
+export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbot, onCrisis, onTakeAssessment, language }: ResultsScreenProps) {
   const t = translations[language as keyof typeof translations];
   
+  // No results view
   if (!results) {
-    return <div>No results available</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="rounded-3xl border-none shadow-xl bg-white/90 backdrop-blur-sm text-center max-w-lg w-full">
+          <CardHeader className="items-center">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl bg-muted">
+              <FileText className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-3xl font-bold text-gray-800 pt-4">{t.noResults.title}</CardTitle>
+            <CardDescription className="text-lg text-gray-600 max-w-md mx-auto">
+              {t.noResults.description}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={onTakeAssessment}
+              size="lg"
+              className="px-8 py-3 text-base rounded-2xl font-bold text-white shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #4A90E2 0%, #34C759 100%)' }}
+            >
+              {t.noResults.button}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  const { totalScore, answers } = results;
+  const { totalScore, answers, timestamp } = results;
   const wellbeingLevel = getWellbeingLevel(totalScore);
   const levelInfo = t[wellbeingLevel as 'strained' | 'struggling' | 'critical'];
   
   const crisisIndicators = answers.slice(12);
   const hasRiskFactors = crisisIndicators.some(answer => answer > 1);
+
+  const formattedDate = new Date(timestamp).toLocaleString(language === 'hi' ? 'hi-IN' : 'en-US', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
 
   return (
     <div className="min-h-screen p-4 pb-20">
@@ -135,15 +180,15 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
           
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold text-foreground">
-              {t.title}
+              {t.pastResult}
             </h1>
-            <p className="text-lg text-muted-foreground">
-              {t.subtitle}
+            <p className="text-sm text-muted-foreground">
+              {formattedDate}
             </p>
           </div>
         </div>
 
-        {/* Safety Alert for Critical or High Risk */}
+        {/* Safety Alert */}
         {(wellbeingLevel === 'critical' || hasRiskFactors) && (
           <Alert className="border-red-200 bg-red-50 rounded-2xl">
             <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -172,33 +217,6 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
             </CardContent>
         </Card>
 
-
-        {/* Key Insights */}
-        <Card className="rounded-2xl border-accent/20 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Info className="w-5 h-5 text-primary" />
-              <span>{t.insights}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`flex items-start space-x-3 p-3 rounded-xl ${
-              wellbeingLevel === 'strained' ? 'bg-green-50' : 
-              wellbeingLevel === 'struggling' ? 'bg-yellow-50' : 'bg-red-50'
-            }`}>
-              {wellbeingLevel === 'strained' ? <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" /> : <AlertTriangle className={`w-5 h-5 mt-0.5 ${wellbeingLevel === 'struggling' ? 'text-yellow-600' : 'text-red-600'}`} />}
-              <div>
-                <p className={`text-sm ${
-                  wellbeingLevel === 'strained' ? 'text-green-800' :
-                  wellbeingLevel === 'struggling' ? 'text-yellow-800' : 'text-red-800'
-                }`}>
-                  {levelInfo.insight}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Recommended Actions */}
         <Card className="rounded-2xl border-accent/20 shadow-sm">
           <CardHeader>
@@ -209,7 +227,6 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {/* Crisis Support - shown for critical */}
               {wellbeingLevel === 'critical' && (
                 <div className="flex items-start space-x-4 p-4 border border-red-200 bg-red-50 rounded-2xl">
                   <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
@@ -225,7 +242,6 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
                 </div>
               )}
               
-              {/* Book Counselor - shown for struggling and critical */}
               {(wellbeingLevel === 'struggling' || wellbeingLevel === 'critical') && (
                 <div className="flex items-start space-x-4 p-4 border border-accent/20 rounded-2xl hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -241,7 +257,6 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
                 </div>
               )}
 
-              {/* Self-Help Resources - shown for strained */}
               {wellbeingLevel === 'strained' && (
                 <div className="flex items-start space-x-4 p-4 border border-accent/20 rounded-2xl hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -257,7 +272,6 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
                 </div>
               )}
 
-              {/* AI Chatbot - shown for strained and struggling */}
               {(wellbeingLevel === 'strained' || wellbeingLevel === 'struggling') && (
                 <div className="flex items-start space-x-4 p-4 border border-accent/20 rounded-2xl hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -275,6 +289,14 @@ export default function ResultsScreen({ results, onSelfHelp, onBooking, onChatbo
             </div>
           </CardContent>
         </Card>
+        
+        {/* Retake Assessment */}
+        <div className="text-center">
+            <Button onClick={onTakeAssessment} size="lg" variant="outline" className="rounded-2xl">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {t.retake}
+            </Button>
+        </div>
       </div>
     </div>
   );

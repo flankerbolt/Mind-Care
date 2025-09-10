@@ -24,7 +24,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const screens = {
-    login: <LoginScreen
+    login: <LoginScreen 
       onLogin={() => {
         setIsLoggedIn(true);
         setCurrentScreen('onboarding');
@@ -37,12 +37,13 @@ export default function App() {
       setAssessmentResults(results);
       setCurrentScreen('results');
     }} language={language} />,
-    results: <ResultsScreen
-      results={assessmentResults}
+    results: <ResultsScreen 
+      results={assessmentResults} 
       onSelfHelp={() => setCurrentScreen('selfhelp')}
       onBooking={() => setCurrentScreen('booking')}
       onChatbot={() => setCurrentScreen('chatbot')}
       onCrisis={() => setCurrentScreen('crisis')}
+      onTakeAssessment={() => setCurrentScreen('assessment')}
       language={language}
     />,
     selfhelp: <SelfHelpScreen language={language} />,
