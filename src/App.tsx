@@ -46,21 +46,21 @@ export default function App() {
       language={language}
       setLanguage={setLanguage}
     />,
-    onboarding: <OnboardingScreen 
-      onNext={handleOnboardingComplete} 
-      language={language} 
-      setLanguage={setLanguage} 
+    onboarding: <OnboardingScreen
+      onNext={handleOnboardingComplete}
+      language={language}
+      setLanguage={setLanguage}
     />,
-    dashboard: <UserProfileDashboard 
-      language={language} 
+    dashboard: <UserProfileDashboard
+      language={language}
       onNavigate={setCurrentScreen}
     />,
     assessment: <AssessmentScreen onComplete={(results) => {
       setAssessmentResults(results);
       setCurrentScreen('results');
     }} language={language} />,
-    results: <ResultsScreen 
-      results={assessmentResults} 
+    results: <ResultsScreen
+      results={assessmentResults}
       onSelfHelp={() => setCurrentScreen('selfhelp')}
       onBooking={() => setCurrentScreen('booking')}
       onChatbot={() => setCurrentScreen('chatbot')}
@@ -91,7 +91,7 @@ export default function App() {
   if (!isLoggedIn || currentScreen === 'login') {
     return screens.login;
   }
-  
+
   if (!hasOnboarded && currentScreen !== 'login') {
       return screens.onboarding;
   }
@@ -114,33 +114,38 @@ export default function App() {
                   <span className="text-sm text-gray-600">Secure Session</span>
                 </div>
               </div>
-              
-              <div className="hidden md:flex items-center space-x-1">
+
+              <div className="hidden md:flex items-center space-x-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = currentScreen === item.id;
+
                   return (
-                    <Tooltip key={item.id}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={currentScreen === item.id ? "default" : "ghost"}
-                          size="icon"
-                          onClick={() => setCurrentScreen(item.id)}
-                          className={`rounded-2xl font-medium transition-all duration-200 ${
-                            currentScreen === item.id 
-                              ? 'shadow-lg' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                          style={currentScreen === item.id ? {
-                            background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)'
-                          } : {}}
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentScreen(item.id)}
+                      className={`group relative flex items-center justify-start overflow-hidden rounded-2xl transition-all duration-300 ease-in-out h-10 px-3
+                        ${isActive
+                          ? 'w-48 shadow-lg'
+                          : 'w-10 hover:w-48 hover:bg-violet-100'
+                        }`}
+                      aria-pressed={isActive}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-violet-600 group-hover:text-violet-700'}`} />
+                        <span className={`whitespace-nowrap text-sm font-medium transition-opacity duration-300
+                          ${isActive ? 'text-black opacity-100' : 'text-black opacity-0 group-hover:opacity-100' }
+                          `}
                         >
-                          <Icon className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{item.label}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                          {item.label}
+                        </span>
+                      </div>
+
+                      {/* Active background (violet) */}
+                      {isActive && (
+                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6]" />
+                      )}
+                    </button>
                   );
                 })}
               </div>
@@ -161,7 +166,7 @@ export default function App() {
                         <p>SOS</p>
                     </TooltipContent>
                 </Tooltip>
-                
+
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -180,7 +185,7 @@ export default function App() {
                         <p>Logout</p>
                     </TooltipContent>
                 </Tooltip>
-                
+
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -214,8 +219,8 @@ export default function App() {
                   size="sm"
                   onClick={() => setCurrentScreen(item.id)}
                   className={`flex flex-col items-center space-y-1 h-auto py-2 px-3 rounded-2xl transition-all duration-200 ${
-                    isActive 
-                      ? 'text-white shadow-md' 
+                    isActive
+                      ? 'text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                   }`}
                   style={isActive ? {
