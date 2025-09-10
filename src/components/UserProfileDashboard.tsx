@@ -13,10 +13,15 @@ import {
   Settings,
   TrendingUp,
   Users,
-  Video
+  Video,
+  MailCheck,
+  Camera,
+  BarChart2,
+  Zap
 } from 'lucide-react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from './ui/chart';
 
-// Error Fix 1: Add onNavigate to the props interface
 interface UserProfileDashboardProps {
   language: string;
   onNavigate: (screen: string) => void;
@@ -44,10 +49,15 @@ const translations = {
       date: "Tomorrow, 2:00 PM",
       join: "Join Video Call"
     },
-    progress: {
-      title: "Your Progress",
-      description: "You've completed 3 sessions and 5 self-help activities this month!",
-      view: "View Detailed Progress"
+    profileCompletion: {
+        title: "Complete Your Profile",
+        description: "You have a few steps left to get the most out of NIVI.",
+        steps: {
+            email: "Verify Email",
+            photo: "Add Profile Photo",
+            preferences: "Set Preferences"
+        },
+        button: "Go to Profile"
     },
     quickAccess: {
       title: "Quick Access",
@@ -55,6 +65,20 @@ const translations = {
       booking: "Book a Session",
       community: "Peer Community",
       chatbot: "AI Chatbot"
+    },
+    recentActivity: {
+        title: "Your Recent Activity",
+        description: "Your mood score over the last 7 days.",
+        moodScore: "Mood Score"
+    },
+    discoverMore: {
+        title: "Discover More",
+        peerSupport: "Peer Support",
+        peerSupportDesc: "Connect with a supportive community.",
+        selfHelp: "Self-Help Library",
+        selfHelpDesc: "Explore articles, videos, and exercises.",
+        crisisSupport: "Crisis Support",
+        crisisSupportDesc: "Immediate help is available 24/7."
     }
   },
   hi: {
@@ -78,10 +102,15 @@ const translations = {
       date: "कल, दोपहर 2:00 बजे",
       join: "वीडियो कॉल में शामिल हों"
     },
-    progress: {
-      title: "आपकी प्रगति",
-      description: "आपने इस महीने 3 सत्र और 5 स्व-सहायता गतिविधियाँ पूरी की हैं!",
-      view: "विस्तृत प्रगति देखें"
+    profileCompletion: {
+        title: "अपनी प्रोफाइल पूरी करें",
+        description: "NIVI का अधिकतम लाभ उठाने के लिए आपके कुछ ही कदम बचे हैं।",
+        steps: {
+            email: "ईमेल सत्यापित करें",
+            photo: "प्रोफ़ाइल फ़ोटो जोड़ें",
+            preferences: "प्राथमिकताएँ निर्धारित करें"
+        },
+        button: "प्रोफ़ाइल पर जाएं"
     },
     quickAccess: {
       title: "त्वरित पहुँच",
@@ -89,17 +118,48 @@ const translations = {
       booking: "सत्र बुक करें",
       community: "साथी समुदाय",
       chatbot: "AI चैटबॉट"
+    },
+    recentActivity: {
+        title: "आपकी हाल की गतिविधि",
+        description: "पिछले 7 दिनों में आपका मूड स्कोर।",
+        moodScore: "मूड स्कोर"
+    },
+    discoverMore: {
+        title: "और जानें",
+        peerSupport: "साथी सहायता",
+        peerSupportDesc: "एक सहायक समुदाय से जुड़ें।",
+        selfHelp: "स्व-सहायता लाइब्रेरी",
+        selfHelpDesc: "लेख, वीडियो और व्यायाम देखें।",
+        crisisSupport: "संकट सहायता",
+        crisisSupportDesc: "तत्काल सहायता 24/7 उपलब्ध है।"
     }
   }
 };
 
-// Error Fix 2: Accept onNavigate in the function definition
+const activityData = [
+  { day: "Mon", mood: 7 },
+  { day: "Tue", mood: 6 },
+  { day: "Wed", mood: 8 },
+  { day: "Thu", mood: 7 },
+  { day: "Fri", mood: 9 },
+  { day: "Sat", mood: 8 },
+  { day: "Sun", mood: 7 },
+];
+
+const chartConfig = {
+  mood: {
+    label: "Mood",
+    color: "hsl(var(--primary))",
+  },
+};
+
 export default function UserProfileDashboard({ language, onNavigate }: UserProfileDashboardProps) {
   const t = translations[language as keyof typeof translations];
+  const profileCompletionPercentage = 75;
 
   return (
     <div className="min-h-screen p-4 pb-20">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="space-y-2">
@@ -121,26 +181,6 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Assessment Card */}
-            <Card className="rounded-2xl border-accent/20 shadow-sm bg-gradient-to-br from-primary/5 via-white to-secondary/5">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">{t.assessmentCard.title}</CardTitle>
-                  <CardDescription className="mt-1">{t.assessmentCard.description}</CardDescription>
-                   {/* Error Fix 3: Use the onNavigate function on all buttons */}
-                  <Button size="sm" className="mt-4 rounded-xl" onClick={() => onNavigate('assessment')}>
-                    {t.assessmentCard.retake}
-                  </Button>
-                </div>
-                <div className="text-center">
-                  <Badge className="bg-green-100 text-green-800 border-green-200 text-lg rounded-full px-4 py-2">
-                    {t.assessmentCard.status}
-                  </Badge>
-                  <p className="font-bold text-5xl text-green-600 mt-2">12/48</p>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Recommendations */}
             <Card className="rounded-2xl border-accent/20 shadow-sm">
               <CardHeader>
@@ -169,6 +209,64 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
                   </Button>
                 </div>
               </CardContent>
+            </Card>
+            
+            {/* Quick Access */}
+            <Card className="rounded-2xl border-accent/20 shadow-sm">
+              <CardHeader>
+                <CardTitle>{t.quickAccess.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('selfhelp')}>
+                  <BookOpen />
+                  <span>{t.quickAccess.selfHelp}</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('booking')}>
+                  <Calendar />
+                  <span>{t.quickAccess.booking}</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('peersupport')}>
+                  <Users />
+                  <span>{t.quickAccess.community}</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('chatbot')}>
+                  <MessageCircle />
+                  <span>{t.quickAccess.chatbot}</span>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="rounded-2xl border-accent/20 shadow-sm">
+                <CardHeader>
+                    <CardTitle className="flex items-center">
+                        <BarChart2 className="w-5 h-5 mr-2 text-primary" />
+                        {t.recentActivity.title}
+                    </CardTitle>
+                    <CardDescription>{t.recentActivity.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                        <AreaChart data={activityData}>
+                            <defs>
+                                <linearGradient id="fillMood" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="var(--color-mood)" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="var(--color-mood)" stopOpacity={0.1} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} />
+                            <Tooltip content={<ChartTooltipContent indicator="line" />} />
+                            <Area
+                                dataKey="mood"
+                                type="natural"
+                                fill="url(#fillMood)"
+                                stroke="var(--color-mood)"
+                                stackId="a"
+                            />
+                        </AreaChart>
+                    </ChartContainer>
+                </CardContent>
             </Card>
           </div>
 
@@ -199,49 +297,81 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
               </CardContent>
             </Card>
 
-            {/* Your Progress */}
+            {/* Complete Your Profile Card */}
             <Card className="rounded-2xl border-accent/20 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                  {t.progress.title}
+                  {t.profileCompletion.title}
                 </CardTitle>
-                <CardDescription>{t.progress.description}</CardDescription>
+                <CardDescription>{t.profileCompletion.description}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Progress value={66} className="h-2 rounded-full" />
-                <Button variant="link" className="p-0 h-auto mt-3 text-primary">
-                  {t.progress.view}
+              <CardContent className="space-y-4">
+                <Progress value={profileCompletionPercentage} className="h-2 rounded-full" />
+                <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center"><MailCheck className="w-4 h-4 mr-2 text-green-500"/> <span>{t.profileCompletion.steps.email}</span></div>
+                    <div className="flex items-center"><Camera className="w-4 h-4 mr-2 text-gray-400"/> <span>{t.profileCompletion.steps.photo}</span></div>
+                    <div className="flex items-center"><Settings className="w-4 h-4 mr-2 text-gray-400"/> <span>{t.profileCompletion.steps.preferences}</span></div>
+                </div>
+                <Button variant="outline" className="w-full rounded-xl" onClick={() => onNavigate('profile')}>
+                  {t.profileCompletion.button}
                 </Button>
               </CardContent>
             </Card>
           </div>
         </div>
         
-        {/* Quick Access */}
-        <Card className="rounded-2xl border-accent/20 shadow-sm">
-          <CardHeader>
-            <CardTitle>{t.quickAccess.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('selfhelp')}>
-              <BookOpen />
-              <span>{t.quickAccess.selfHelp}</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('booking')}>
-              <Calendar />
-              <span>{t.quickAccess.booking}</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('peersupport')}>
-              <Users />
-              <span>{t.quickAccess.community}</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-1 rounded-2xl" onClick={() => onNavigate('chatbot')}>
-              <MessageCircle />
-              <span>{t.quickAccess.chatbot}</span>
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Discover More */}
+        <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-foreground">{t.discoverMore.title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Peer Support Card */}
+                <Card className="rounded-2xl border-accent/20 shadow-sm hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-2">
+                            <Users className="w-6 h-6 text-blue-600"/>
+                        </div>
+                        <CardTitle>{t.discoverMore.peerSupport}</CardTitle>
+                        <CardDescription>{t.discoverMore.peerSupportDesc}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button variant="link" className="p-0 text-primary" onClick={() => onNavigate('peersupport')}>
+                            Join Community <ArrowRight className="w-4 h-4 ml-1"/>
+                        </Button>
+                    </CardContent>
+                </Card>
+                {/* Self Help Card */}
+                <Card className="rounded-2xl border-accent/20 shadow-sm hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                         <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mb-2">
+                            <BookOpen className="w-6 h-6 text-green-600"/>
+                        </div>
+                        <CardTitle>{t.discoverMore.selfHelp}</CardTitle>
+                        <CardDescription>{t.discoverMore.selfHelpDesc}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <Button variant="link" className="p-0 text-primary" onClick={() => onNavigate('selfhelp')}>
+                            Explore Resources <ArrowRight className="w-4 h-4 ml-1"/>
+                        </Button>
+                    </CardContent>
+                </Card>
+                {/* Crisis Support Card */}
+                <Card className="rounded-2xl border-accent/20 shadow-sm hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                         <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-2">
+                            <Zap className="w-6 h-6 text-red-600"/>
+                        </div>
+                        <CardTitle>{t.discoverMore.crisisSupport}</CardTitle>
+                        <CardDescription>{t.discoverMore.crisisSupportDesc}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <Button variant="link" className="p-0 text-primary" onClick={() => onNavigate('crisis')}>
+                            Get Help Now <ArrowRight className="w-4 h-4 ml-1"/>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
       </div>
     </div>
   );
