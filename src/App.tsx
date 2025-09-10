@@ -42,6 +42,7 @@ export default function App() {
       onSelfHelp={() => setCurrentScreen('selfhelp')}
       onBooking={() => setCurrentScreen('booking')}
       onChatbot={() => setCurrentScreen('chatbot')}
+      onCrisis={() => setCurrentScreen('crisis')}
       language={language}
     />,
     selfhelp: <SelfHelpScreen language={language} />,
