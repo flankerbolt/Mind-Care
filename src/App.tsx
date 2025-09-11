@@ -26,13 +26,16 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState(false);
 
-  const handleLogin = () => {
+  const handleSignIn = () => {
     setIsLoggedIn(true);
-    if (hasOnboarded) {
-      setCurrentScreen('dashboard');
-    } else {
-      setCurrentScreen('onboarding');
-    }
+    setHasOnboarded(true); // Assume user who signs in is already onboarded
+    setCurrentScreen('dashboard');
+  };
+
+  const handleRegister = () => {
+    setIsLoggedIn(true);
+    setHasOnboarded(false); // New user, so show onboarding
+    setCurrentScreen('onboarding');
   };
 
   const handleOnboardingComplete = () => {
@@ -42,7 +45,8 @@ export default function App() {
 
   const screens = {
     login: <LoginScreen
-      onLogin={handleLogin}
+      onSignIn={handleSignIn}
+      onRegister={handleRegister}
       language={language}
       setLanguage={setLanguage}
     />,
@@ -88,11 +92,11 @@ export default function App() {
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
-  if (!isLoggedIn || currentScreen === 'login') {
+  if (!isLoggedIn) {
     return screens.login;
   }
 
-  if (!hasOnboarded && currentScreen !== 'login') {
+  if (!hasOnboarded) {
       return screens.onboarding;
   }
 

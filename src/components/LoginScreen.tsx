@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 
 interface LoginScreenProps {
-  onLogin: () => void;
+  onSignIn: () => void;
+  onRegister: () => void;
   language: string;
   setLanguage: (lang: string) => void;
 }
@@ -109,7 +110,7 @@ const translations = {
   }
 };
 
-export default function LoginScreen({ onLogin, language, setLanguage }: LoginScreenProps) {
+export default function LoginScreen({ onSignIn, onRegister, language, setLanguage }: LoginScreenProps) {
   const t = translations[language as keyof typeof translations];
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -175,7 +176,7 @@ export default function LoginScreen({ onLogin, language, setLanguage }: LoginScr
     setErrors(newErrors);
 
     if (!newErrors.email && !newErrors.password) {
-        onLogin();
+        onSignIn();
     }
   };
 
@@ -195,7 +196,7 @@ export default function LoginScreen({ onLogin, language, setLanguage }: LoginScr
     setErrors(newErrors);
 
     if (Object.values(newErrors).every(x => x === '')) {
-      onLogin();
+      onRegister();
     }
   };
 
