@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -37,6 +37,15 @@ import {
   MoreVertical,
   RefreshCw
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from './ui/dialog';
 
 interface ProfileScreenProps {
   language: string;
@@ -86,6 +95,10 @@ const translations = {
     
     // Security
     changePassword: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    updatePassword: "Update Password",
     twoFactorAuth: "Two-Factor Authentication",
     enable2FA: "Enable 2FA for enhanced security",
     
@@ -169,6 +182,10 @@ const translations = {
     
     // Security
     changePassword: "पासवर्ड बदलें",
+    currentPassword: "वर्तमान पासवर्ड",
+    newPassword: "नया पासवर्ड",
+    confirmNewPassword: "नए पासवर्ड की पुष्टि करें",
+    updatePassword: "पासवर्ड अपडेट करें",
     twoFactorAuth: "द्विकारक प्रमाणीकरण",
     enable2FA: "बेहतर सुरक्षा के लिए 2FA सक्षम करें",
     
@@ -211,8 +228,23 @@ const translations = {
   }
 };
 
+// ✅ FIX 1: Create a type for the user profile
+type UserProfile = {
+  name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  institution: string;
+  yearOfStudy: string;
+  profilePhoto: string | null;
+  is2FAEnabled: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  sessionReminders: boolean;
+};
+
 // Mock user data
-const mockUser = {
+const mockUser: UserProfile = {
   name: "Priya Sharma",
   email: "priya.sharma@university.edu",
   phone: "+91 98765 43210",
@@ -227,7 +259,7 @@ const mockUser = {
 };
 
 // Mock bookings data
-const mockBookings = [
+const mockBookingsData = [
   {
     id: 1,
     counselor: {
@@ -289,12 +321,95 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   
-  const [userProfile, setUserProfile] = useState(mockUser);
+  const [userProfile, setUserProfile] = useState<UserProfile>(mockUser);
+  const [bookings, setBookings] = useState(mockBookingsData);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Calculate profile completion percentage
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUserProfile({ ...userProfile, profilePhoto: reader.result as string });
+      };
+  reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveChanges = () => {
+    setIsEditing(false);
+    alert(t.profileUpdated);
+  };
+  
+  const handleCancelBooking = (bookingId: number) => {
+    if (window.confirm("Are you sure you want to cancel this booking?")) {
+      setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+    }
+  };
+
+  const handleRebook = (bookingId: number) => {
+    const newBooking = { ...bookings.find(b => b.id === bookingId)!, id: Date.now(), status: 'upcoming' as 'upcoming' };
+    setBookings([newBooking, ...bookings]);
+    alert("Booking has been rebooked!");
+    setActiveTab("bookings");
+  };
+
+  // UI state for session/chat/details modals
+  const [activeSession, setActiveSession] = useState<any | null>(null);
+  const [activeBookingDetails, setActiveBookingDetails] = useState<any | null>(null);
+
+  const handleJoinSession = (booking: any) => {
+    if (booking.status !== 'upcoming') {
+      alert('You can only join upcoming sessions.');
+      return;
+    }
+
+    switch (booking.sessionType) {
+      case 'video': {
+        // Open a new window/tab for the video session. Replace with real URL when available.
+        const url = `/join/${booking.id}`;
+        window.open(url, '_blank');
+        break;
+      }
+      case 'chat': {
+        // Show an in-app chat placeholder modal
+        setActiveSession({ type: 'chat', booking });
+        break;
+      }
+      case 'phone': {
+        // Show phone instructions
+        alert(`Call ${booking.counselor.name} at the phone number provided by the counselor.`);
+        break;
+      }
+      default:
+        alert('Unknown session type');
+    }
+  };
+
+  const handleReschedule = (bookingId: number) => {
+    const newDate = window.prompt('Enter new date (YYYY-MM-DD):', '2024-12-25');
+    if (!newDate) return;
+    const newTime = window.prompt('Enter new time (e.g. 3:00 PM):', '3:00 PM');
+    if (!newTime) return;
+
+    setBookings(bookings.map(b => b.id === bookingId ? { ...b, date: newDate, time: newTime, status: 'upcoming' } : b));
+    alert('Booking rescheduled');
+  };
+
+  const handleRateBooking = (bookingId: number) => {
+    const rating = window.prompt('Rate your session from 1 to 5:', '5');
+    if (!rating) return;
+    alert(`Thanks for rating: ${rating}`);
+  };
+
+  const handleViewDetails = (booking: any) => {
+    setActiveBookingDetails(booking);
+  };
+
   const calculateProfileCompletion = () => {
-    const fields = ['name', 'email', 'phone', 'gender', 'institution', 'yearOfStudy'];
-    const completedFields = fields.filter(field => userProfile[field as keyof typeof userProfile]);
+    // ✅ FIX 2: Define `fields` as an array of keys from the UserProfile type
+    const fields: (keyof UserProfile)[] = ['name', 'email', 'phone', 'gender', 'institution', 'yearOfStudy'];
+    const completedFields = fields.filter(field => userProfile[field]);
     return Math.round((completedFields.length / fields.length) * 100);
   };
 
@@ -325,9 +440,19 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
     }
   };
 
-  const filteredBookings = mockBookings.filter(booking => {
+  // Return localized status text from translations to avoid computed-key typing issues
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'upcoming': return t.statusUpcoming;
+      case 'completed': return t.statusCompleted;
+      case 'cancelled': return t.statusCancelled;
+      default: return '';
+    }
+  };
+
+  const filteredBookings = bookings.filter(booking => {
     const matchesSearch = booking.counselor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         booking.counselor.specialization.toLowerCase().includes(searchQuery.toLowerCase());
+                          booking.counselor.specialization.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     
     return matchesSearch && matchesStatus;
@@ -354,7 +479,7 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
             <div className="flex items-center space-x-4">
               <Avatar className="w-14 h-14 shadow-lg">
                 <AvatarFallback className="text-white font-bold"
-                               style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
+                                style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
                   {booking.counselor.photo}
                 </AvatarFallback>
               </Avatar>
@@ -373,7 +498,7 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
             
             <Badge className={`rounded-full font-medium ${getStatusColor(booking.status)}`}>
               <StatusIcon className="w-3 h-3 mr-1" />
-              {t[`status${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}` as keyof typeof t]}
+              {getStatusText(booking.status)}
             </Badge>
           </div>
           
@@ -396,6 +521,7 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                 <Button 
                   className="flex-1 rounded-2xl font-medium text-white"
                   style={{ background: 'linear-gradient(135deg, #34C759 0%, #4A90E2 100%)' }}
+                  onClick={() => handleJoinSession(booking)}
                 >
                   {t.joinSession}
                 </Button>
@@ -403,6 +529,7 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                   variant="outline" 
                   size="sm"
                   className="rounded-2xl border-gray-300"
+                  onClick={() => handleReschedule(booking.id)}
                 >
                   <RefreshCw className="w-4 h-4 mr-1" />
                   {t.reschedule}
@@ -411,17 +538,27 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                   variant="outline" 
                   size="sm"
                   className="rounded-2xl border-gray-300"
+                  onClick={() => handleCancelBooking(booking.id)}
                 >
                   <X className="w-4 h-4" />
                 </Button>
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-2xl"
+                  onClick={() => handleViewDetails(booking)}
+                >
+                  {t.viewDetails}
+                </Button>
               </>
             )}
-            
+
             {booking.status === 'completed' && (
               <>
                 <Button 
                   variant="outline"
                   className="flex-1 rounded-2xl font-medium"
+                  onClick={() => handleRebook(booking.id)}
                 >
                   {t.rebook}
                 </Button>
@@ -429,19 +566,39 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                   variant="outline" 
                   size="sm"
                   className="rounded-2xl border-gray-300"
+                  onClick={() => handleRateBooking(booking.id)}
                 >
                   <Star className="w-4 h-4" />
                 </Button>
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-2xl"
+                  onClick={() => handleViewDetails(booking)}
+                >
+                  {t.viewDetails}
+                </Button>
               </>
             )}
-            
+
             {booking.status === 'cancelled' && (
-              <Button 
-                variant="outline"
-                className="flex-1 rounded-2xl font-medium"
-              >
-                {t.rebook}
-              </Button>
+              <>
+                <Button 
+                  variant="outline"
+                  className="flex-1 rounded-2xl font-medium"
+                  onClick={() => handleRebook(booking.id)}
+                >
+                  {t.rebook}
+                </Button>
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-2xl"
+                  onClick={() => handleViewDetails(booking)}
+                >
+                  {t.viewDetails}
+                </Button>
+              </>
             )}
           </div>
         </CardContent>
@@ -544,18 +701,21 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                   {/* Profile Photo */}
                   <div className="flex items-center space-x-6">
                     <Avatar className="w-24 h-24 shadow-lg">
+                      <AvatarImage src={userProfile.profilePhoto || undefined} />
                       <AvatarFallback className="text-white text-2xl font-bold"
-                                     style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
+                                      style={{ background: 'linear-gradient(135deg, #E4004B 0%, #FF6B9D 100%)' }}>
                         {userProfile.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-bold text-gray-800">{t.profilePhoto}</h3>
+                      <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
                       <Button
                         variant="outline"
                         size="sm"
                         className="mt-2 rounded-2xl"
                         disabled={!isEditing}
+                        onClick={() => fileInputRef.current?.click()}
                       >
                         <Camera className="w-4 h-4 mr-2" />
                         {t.upload}
@@ -656,7 +816,7 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                   {isEditing && (
                     <div className="flex justify-end">
                       <Button
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleSaveChanges}
                         className="rounded-2xl font-medium text-white"
                         style={{ background: 'linear-gradient(135deg, #34C759 0%, #4A90E2 100%)' }}
                       >
@@ -675,13 +835,43 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
                     <CardTitle className="text-xl font-bold text-gray-800">{t.accountSecurity}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-2xl justify-start"
-                    >
-                      <Lock className="w-4 h-4 mr-2" />
-                      {t.changePassword}
-                    </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-2xl justify-start"
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        {t.changePassword}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t.changePassword}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="currentPassword">{t.currentPassword}</Label>
+                            <Input id="currentPassword" type="password" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="newPassword">{t.newPassword}</Label>
+                            <Input id="newPassword" type="password" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmNewPassword">{t.confirmNewPassword}</Label>
+                            <Input id="confirmNewPassword" type="password" />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                          <Button 
+                            onClick={() => alert("Password updated successfully!")}
+                          >
+                            {t.updatePassword}
+                          </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                     
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
                       <div className="flex items-center space-x-3">
@@ -798,7 +988,9 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
             {/* Bookings Grid */}
             <div className="grid lg:grid-cols-2 gap-6">
               {filteredBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
+                <div key={booking.id}>
+                  <BookingCard booking={booking} />
+                </div>
               ))}
             </div>
 
@@ -812,6 +1004,42 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Session / Chat Modal */}
+      {activeSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">{activeSession.type === 'chat' ? 'Chat Session' : 'Session'}</h3>
+              <Button variant="ghost" onClick={() => setActiveSession(null)}>Close</Button>
+            </div>
+            <div className="h-64 overflow-auto">
+              <p className="text-gray-600">This is a placeholder for the in-app chat/session UI for booking with {activeSession.booking.counselor.name}.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Details Modal */}
+      {activeBookingDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">{t.viewDetails}</h3>
+              <Button variant="ghost" onClick={() => setActiveBookingDetails(null)}>Close</Button>
+            </div>
+            <div className="space-y-3">
+              <p><strong>Counselor:</strong> {activeBookingDetails.counselor.name}</p>
+              <p><strong>Specialization:</strong> {activeBookingDetails.counselor.specialization}</p>
+              <p><strong>Date:</strong> {formatDate(activeBookingDetails.date)}</p>
+              <p><strong>Time:</strong> {activeBookingDetails.time}</p>
+              <p><strong>Type:</strong> {activeBookingDetails.sessionType}</p>
+              <p><strong>Duration:</strong> {activeBookingDetails.duration}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
