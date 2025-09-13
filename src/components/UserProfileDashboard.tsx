@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -24,17 +24,21 @@ import { ChartContainer, ChartTooltipContent } from './ui/chart';
 interface UserProfileDashboardProps {
     language: string;
     onNavigate: (screen: string) => void;
+    userName?: string;
+    userInstitution?: string;
+    userEmail?: string;
+    profilePhoto?: string | null;
 }
 
 const translations = {
     en: {
-        welcome: "Welcome back, Samir!",
+        welcome: "Welcome back", // Dynamic name will be added here
         subtitle: "Here's your personalized mental wellness dashboard.",
         personalInfo: {
-            title: "Personal Information", // Title added
-            name: "Samir Shaw",
-            institution: "Kolkata University",
-            username: "@samir_shaw",
+            title: "Personal Information",
+            name: "Samir Shaw", // This will be replaced by prop
+            institution: "Kolkata University", // This will be replaced by prop
+            username: "@samir_shaw", // This will be generated from email
             edit: "Edit Profile"
         },
         upcoming: {
@@ -67,10 +71,10 @@ const translations = {
         },
     },
     hi: {
-        welcome: "वापसी पर स्वागत है, समीर!",
+        welcome: "वापसी पर स्वागत है", // Dynamic name will be added here
         subtitle: "यह आपका व्यक्तिगत मानसिक स्वास्थ्य डैशबोर्ड है।",
         personalInfo: {
-            title: "व्यक्तिगत जानकारी", // Title added
+            title: "व्यक्तिगत जानकारी",
             name: "समीर शॉ",
             institution: "कोलकाता विश्वविद्यालय",
             username: "@samir_shaw",
@@ -117,9 +121,9 @@ const chartConfig = {
     mood: { label: "Mood", color: "hsl(var(--primary))" },
 };
 
-export default function UserProfileDashboard({ language, onNavigate }: UserProfileDashboardProps) {
+export default function UserProfileDashboard({ language, onNavigate, userName, userInstitution, userEmail, profilePhoto }: UserProfileDashboardProps) {
     const t = translations[language as keyof typeof translations];
-    const [profileCompletion] = useState(100);
+    const profileCompletion = 100; // You can make this dynamic later
 
     // Calculate mood statistics
     const moods = activityData.map(d => d.mood);
@@ -127,16 +131,21 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
     const highestMood = Math.max(...moods);
     const lowestMood = Math.min(...moods);
 
+    // --- Dynamic User Data with Defaults ---
+    const displayName = userName || t.personalInfo.name;
+    const displayInstitution = userInstitution || t.personalInfo.institution;
+    const displayUsername = userEmail ? `@${userEmail.split('@')[0]}` : t.personalInfo.username;
+    const avatarFallback = displayName.split(' ').map(n => n[0]).join('');
+
     return (
         <div className="min-h-screen bg-background p-4 pb-20">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold text-foreground">{t.welcome}</h1>
+                        <h1 className="text-3xl font-bold text-foreground">{t.welcome}, {displayName}!</h1>
                         <p className="text-md text-muted-foreground">{t.subtitle}</p>
                     </div>
-                    {/* The icons that were here have been removed */}
                 </div>
 
                 {/* Main Grid */}
@@ -220,7 +229,7 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
                         </Card>
                     </div>
 
-                    {/* Right Column - UPDATED COMBINED CARD */}
+                    {/* Right Column - Combined Card */}
                     <Card className="rounded-2xl shadow-sm lg:col-span-1 h-full">
                         <CardContent className="p-0 flex flex-col h-full">
                             {/* Personal Info Section */}
@@ -231,22 +240,22 @@ export default function UserProfileDashboard({ language, onNavigate }: UserProfi
                                 </h3>
                                 <div className="relative mb-4">
                                     <Avatar className="w-24 h-24 text-3xl">
-                                        <AvatarImage src="https://github.com/shadcn.png" alt={t.personalInfo.name} />
-                                        <AvatarFallback>SS</AvatarFallback>
+                                        <AvatarImage src={profilePhoto || undefined} alt={displayName} />
+                                        <AvatarFallback>{avatarFallback}</AvatarFallback>
                                     </Avatar>
                                     {profileCompletion === 100 && (
                                         <BadgeCheck className="absolute top-1 right-1 w-6 h-6 text-green-500 fill-white" />
                                     )}
                                 </div>
                                 <div className="space-y-1 mb-4">
-                                    <h2 className="text-xl font-bold">{t.personalInfo.name}</h2>
+                                    <h2 className="text-xl font-bold">{displayName}</h2>
                                     <div className="flex items-center justify-center space-x-2 text-muted-foreground">
                                         <Building className="w-4 h-4" />
-                                        <p className="text-sm">{t.personalInfo.institution}</p>
+                                        <p className="text-sm">{displayInstitution}</p>
                                     </div>
                                     <div className="flex items-center justify-center space-x-2 text-muted-foreground">
                                         <AtSign className="w-4 h-4" />
-                                        <p className="text-sm">{t.personalInfo.username}</p>
+                                        <p className="text-sm">{displayUsername}</p>
                                     </div>
                                 </div>
                                 <Button variant="outline" className="w-full rounded-lg" onClick={() => onNavigate('profile')}>

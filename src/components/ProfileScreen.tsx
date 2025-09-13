@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -11,45 +11,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Shield, 
-  Bell, 
-  Palette, 
-  Globe, 
-  Calendar,
-  Video,
-  MessageSquare,
-  CheckCircle,
-  Clock,
-  X,
-  Search,
-  Filter,
-  Edit,
-  Camera,
-  Lock,
-  Settings,
-  UserCheck,
-  GraduationCap,
-  Star,
-  MoreVertical,
-  RefreshCw
+  User, Mail, Phone, MapPin, Shield, Bell, Palette, Globe, Calendar, Video,
+  MessageSquare, CheckCircle, Clock, X, Search, Filter, Edit, Camera, Lock,
+  Settings, UserCheck, GraduationCap, Star, MoreVertical, RefreshCw
 } from 'lucide-react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter, DialogTrigger,
 } from './ui/dialog';
+
+// Define a type for the expected user prop
+type UserProfile = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  institution: string;
+  gender?: string;
+  yearOfStudy?: string;
+  profilePhoto?: string | null;
+  is2FAEnabled?: boolean;
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
+  sessionReminders?: boolean;
+};
 
 interface ProfileScreenProps {
   language: string;
   setLanguage: (lang: string) => void;
+  user: UserProfile; // The logged-in user's data
+  onUpdateUser: (user: UserProfile) => void; // Function to update user in App.tsx
 }
 
 const translations = {
@@ -228,102 +219,81 @@ const translations = {
   }
 };
 
-// ✅ FIX 1: Create a type for the user profile
-type UserProfile = {
-  name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  institution: string;
-  yearOfStudy: string;
-  profilePhoto: string | null;
-  is2FAEnabled: boolean;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  sessionReminders: boolean;
-};
-
-// Mock user data
-const mockUser: UserProfile = {
-  name: "Priya Sharma",
-  email: "priya.sharma@university.edu",
-  phone: "+91 98765 43210",
-  gender: "female",
-  institution: "Delhi University",
-  yearOfStudy: "thirdYear",
-  profilePhoto: null,
-  is2FAEnabled: false,
-  emailNotifications: true,
-  pushNotifications: true,
-  sessionReminders: true
-};
-
-// Mock bookings data
+// Mock bookings data (can be kept as is or fetched from an API)
 const mockBookingsData = [
-  {
-    id: 1,
-    counselor: {
-      name: "Dr. Priya Sharma",
-      photo: "PS",
-      specialization: "Anxiety & Depression"
+    {
+      id: 1,
+      counselor: {
+        name: "Dr. Priya Sharma",
+        photo: "PS",
+        specialization: "Anxiety & Depression"
+      },
+      date: "2024-12-20",
+      time: "2:00 PM",
+      sessionType: "video",
+      status: "upcoming",
+      duration: "50 minutes"
     },
-    date: "2024-12-20",
-    time: "2:00 PM",
-    sessionType: "video",
-    status: "upcoming",
-    duration: "50 minutes"
-  },
-  {
-    id: 2,
-    counselor: {
-      name: "Dr. Rajesh Kumar",
-      photo: "RK",
-      specialization: "Trauma & PTSD"
+    {
+      id: 2,
+      counselor: {
+        name: "Dr. Rajesh Kumar",
+        photo: "RK",
+        specialization: "Trauma & PTSD"
+      },
+      date: "2024-12-15",
+      time: "4:00 PM",
+      sessionType: "chat",
+      status: "completed",
+      duration: "50 minutes"
     },
-    date: "2024-12-15",
-    time: "4:00 PM",
-    sessionType: "chat",
-    status: "completed",
-    duration: "50 minutes"
-  },
-  {
-    id: 3,
-    counselor: {
-      name: "Dr. Anita Patel",
-      photo: "AP",
-      specialization: "Stress Management"
+    {
+      id: 3,
+      counselor: {
+        name: "Dr. Anita Patel",
+        photo: "AP",
+        specialization: "Stress Management"
+      },
+      date: "2024-12-10",
+      time: "10:00 AM",
+      sessionType: "video",
+      status: "cancelled",
+      duration: "50 minutes"
     },
-    date: "2024-12-10",
-    time: "10:00 AM",
-    sessionType: "video",
-    status: "cancelled",
-    duration: "50 minutes"
-  },
-  {
-    id: 4,
-    counselor: {
-      name: "Dr. Priya Sharma", 
-      photo: "PS",
-      specialization: "Student Counseling"
-    },
-    date: "2024-12-05",
-    time: "3:30 PM",
-    sessionType: "video",
-    status: "completed",
-    duration: "50 minutes"
-  }
 ];
 
-export default function ProfileScreen({ language, setLanguage }: ProfileScreenProps) {
+export default function ProfileScreen({ language, setLanguage, user, onUpdateUser }: ProfileScreenProps) {
   const t = translations[language as keyof typeof translations];
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   
-  const [userProfile, setUserProfile] = useState<UserProfile>(mockUser);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    ...user,
+    gender: user.gender || 'preferNotToSay',
+    yearOfStudy: user.yearOfStudy || 'firstYear',
+    profilePhoto: user.profilePhoto || null,
+    is2FAEnabled: user.is2FAEnabled || false,
+    emailNotifications: user.emailNotifications || true,
+    pushNotifications: user.pushNotifications || true,
+    sessionReminders: user.sessionReminders || true,
+  });
+  
   const [bookings, setBookings] = useState(mockBookingsData);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setUserProfile({ ...user,
+        gender: user.gender || 'preferNotToSay',
+        yearOfStudy: user.yearOfStudy || 'firstYear',
+        profilePhoto: user.profilePhoto || null,
+        is2FAEnabled: user.is2FAEnabled || false,
+        emailNotifications: user.emailNotifications || true,
+        pushNotifications: user.pushNotifications || true,
+        sessionReminders: user.sessionReminders || true,
+     });
+  }, [user]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -332,11 +302,12 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
       reader.onloadend = () => {
         setUserProfile({ ...userProfile, profilePhoto: reader.result as string });
       };
-  reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSaveChanges = () => {
+    onUpdateUser(userProfile);
     setIsEditing(false);
     alert(t.profileUpdated);
   };
@@ -354,7 +325,6 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
     setActiveTab("bookings");
   };
 
-  // UI state for session/chat/details modals
   const [activeSession, setActiveSession] = useState<any | null>(null);
   const [activeBookingDetails, setActiveBookingDetails] = useState<any | null>(null);
 
@@ -366,18 +336,15 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
 
     switch (booking.sessionType) {
       case 'video': {
-        // Open a new window/tab for the video session. Replace with real URL when available.
         const url = `/join/${booking.id}`;
         window.open(url, '_blank');
         break;
       }
       case 'chat': {
-        // Show an in-app chat placeholder modal
         setActiveSession({ type: 'chat', booking });
         break;
       }
       case 'phone': {
-        // Show phone instructions
         alert(`Call ${booking.counselor.name} at the phone number provided by the counselor.`);
         break;
       }
@@ -407,9 +374,11 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
   };
 
   const calculateProfileCompletion = () => {
-    // ✅ FIX 2: Define `fields` as an array of keys from the UserProfile type
     const fields: (keyof UserProfile)[] = ['name', 'email', 'phone', 'gender', 'institution', 'yearOfStudy'];
-    const completedFields = fields.filter(field => userProfile[field]);
+    const completedFields = fields.filter(field => {
+      const value = userProfile[field];
+      return value !== null && value !== undefined && value !== '';
+    });
     return Math.round((completedFields.length / fields.length) * 100);
   };
 
@@ -440,7 +409,6 @@ export default function ProfileScreen({ language, setLanguage }: ProfileScreenPr
     }
   };
 
-  // Return localized status text from translations to avoid computed-key typing issues
   const getStatusText = (status: string) => {
     switch (status) {
       case 'upcoming': return t.statusUpcoming;

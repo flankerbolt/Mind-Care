@@ -19,8 +19,9 @@ import {
 } from 'lucide-react';
 
 interface LoginScreenProps {
-  onSignIn: () => void;
-  onRegister: () => void;
+  // UPDATED: These functions now accept data to pass to the parent
+  onSignIn: (data: any) => void;
+  onRegister: (data: any) => void;
   language: string;
   setLanguage: (lang: string) => void;
 }
@@ -176,7 +177,8 @@ export default function LoginScreen({ onSignIn, onRegister, language, setLanguag
     setErrors(newErrors);
 
     if (!newErrors.email && !newErrors.password) {
-        onSignIn();
+        // UPDATED: Pass login credentials to the parent component
+        onSignIn({ email: formData.email, password: formData.password });
     }
   };
 
@@ -196,10 +198,12 @@ export default function LoginScreen({ onSignIn, onRegister, language, setLanguag
     setErrors(newErrors);
 
     if (Object.values(newErrors).every(x => x === '')) {
-      onRegister();
+      // UPDATED: Pass the full form data to the parent component
+      onRegister(formData);
     }
   };
 
+  // ... (rest of the JSX remains the same)
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
          style={{ background: 'linear-gradient(135deg, #FDF2F8 0%, #F0F9FF 100%)' }}>

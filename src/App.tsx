@@ -19,20 +19,60 @@ import AdminDashboard from './components/AdminDashboard';
 import CrisisScreen from './components/CrisisScreen';
 import PeerSupportScreen from './components/PeerSupportScreen';
 
+// Define a type for the user object for better type safety
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  institution: string;
+  gender?: string;
+  yearOfStudy?: string;
+  profilePhoto?: string | null;
+  is2FAEnabled?: boolean;
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
+  sessionReminders?: boolean;
+};
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('login');
   const [assessmentResults, setAssessmentResults] = useState(null);
   const [language, setLanguage] = useState('en');
+  
+  // State for authentication and user data
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  
   const [hasOnboarded, setHasOnboarded] = useState(false);
 
-  const handleSignIn = () => {
+  // --- Demo Handlers ---
+
+  const handleSignIn = (credentials: any) => {
+    // For demo purposes, we'll create a mock user object
+    const mockUser: User = {
+      id: 1,
+      name: 'Priya Sharma', // Default name
+      email: credentials.email,
+      phone: '+91 98765 43210', // Default phone
+      institution: 'Delhi University', // Default institution
+    };
+    setCurrentUser(mockUser);
     setIsLoggedIn(true);
-    setHasOnboarded(true); // Assume user who signs in is already onboarded
+    setHasOnboarded(true);
     setCurrentScreen('dashboard');
   };
 
-  const handleRegister = () => {
+  const handleRegister = (userData: any) => {
+    // For demo purposes, we'll use the registration data directly
+    const newUser: User = {
+      id: Date.now(), // Create a unique ID
+      name: userData.fullName,
+      email: userData.email,
+      phone: userData.phone,
+      institution: userData.institution,
+    };
+    setCurrentUser(newUser);
     setIsLoggedIn(true);
     setHasOnboarded(false); // New user, so show onboarding
     setCurrentScreen('onboarding');
@@ -41,6 +81,12 @@ export default function App() {
   const handleOnboardingComplete = () => {
     setHasOnboarded(true);
     setCurrentScreen('dashboard');
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    setCurrentScreen('login');
   };
 
   const screens = {
@@ -58,6 +104,7 @@ export default function App() {
     dashboard: <UserProfileDashboard
       language={language}
       onNavigate={setCurrentScreen}
+      userName={currentUser?.name} 
     />,
     assessment: <AssessmentScreen onComplete={(results) => {
       setAssessmentResults(results);
@@ -75,7 +122,14 @@ export default function App() {
     selfhelp: <SelfHelpScreen language={language} />,
     chatbot: <ChatbotScreen language={language} onCrisis={() => setCurrentScreen('crisis')} />,
     booking: <BookingScreen language={language} setLanguage={setLanguage} />,
-    profile: <ProfileScreen language={language} setLanguage={setLanguage} />,
+    profile: currentUser ? (
+        <ProfileScreen 
+          language={language} 
+          setLanguage={setLanguage} 
+          user={currentUser}
+          onUpdateUser={setCurrentUser}
+        />
+    ) : null,
     peersupport: <PeerSupportScreen language={language} />,
     admin: <AdminDashboard />,
     crisis: <CrisisScreen language={language} setLanguage={setLanguage} onBack={() => setCurrentScreen('dashboard')} />
@@ -113,10 +167,6 @@ export default function App() {
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800">NIVI</h1>
-                <div className="hidden md:flex items-center space-x-2 ml-4">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Secure Session</span>
-                </div>
               </div>
 
               <div className="hidden md:flex items-center space-x-2">
@@ -144,8 +194,6 @@ export default function App() {
                           {item.label}
                         </span>
                       </div>
-
-                      {/* Active background (violet) */}
                       {isActive && (
                         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6]" />
                       )}
@@ -174,10 +222,7 @@ export default function App() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            onClick={() => {
-                            setIsLoggedIn(false);
-                            setCurrentScreen('login');
-                            }}
+                            onClick={handleLogout}
                             variant="outline"
                             size="icon"
                             className="rounded-2xl font-medium border-gray-300 hover:bg-gray-50"
