@@ -49,7 +49,7 @@ export default function App() {
   // --- Demo Handlers ---
 
   const handleSignIn = (credentials: any) => {
-    // For demo purposes, we'll create a mock user object
+    // For demo purposes, we'll create a mock user obj
     const mockUser: User = {
       id: 1,
       name: 'Priya Sharma', // Default name
