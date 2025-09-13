@@ -104,7 +104,10 @@ export default function App() {
     dashboard: <UserProfileDashboard
       language={language}
       onNavigate={setCurrentScreen}
-      userName={currentUser?.name} 
+      userName={currentUser?.name}
+      userInstitution={currentUser?.institution}
+      userEmail={currentUser?.email}
+      profilePhoto={currentUser?.profilePhoto}
     />,
     assessment: <AssessmentScreen onComplete={(results) => {
       setAssessmentResults(results);
