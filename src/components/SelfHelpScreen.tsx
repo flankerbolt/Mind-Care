@@ -115,8 +115,8 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
     const halfLen = Math.ceil(resource.description.length / 2);
     const displayedDesc = expanded ? resource.description : (resource.description.length > halfLen ? resource.description.slice(0, halfLen).trim() + '...' : resource.description);
     return (
-      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200">
-        <div className="relative h-32">
+      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200 h-full flex flex-col">
+        <div className="relative h-[6.4rem]">
           <ImageWithFallback src={resource.image} alt={resource.title} className="w-full h-full object-cover rounded-t-2xl" />
           <div className="absolute top-3 left-3">
             <Badge className="bg-white/90 text-foreground border-0 inline-flex items-center gap-2"><Icon className="w-3 h-3" /> <span className="text-xs capitalize">{resource.type}</span></Badge>
@@ -126,8 +126,8 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
           </div>
         </div>
 
-    <CardContent className="p-3">
-          <div className="flex items-start gap-4">
+  <CardContent className="p-3 flex flex-col flex-1">
+      <div className="flex items-start gap-4 flex-1">
             <div className="flex-1">
               <h3 className="text-lg font-semibold mb-1">{resource.title}</h3>
       <p className={`text-sm text-muted-foreground mb-2`}>{displayedDesc}</p>
@@ -148,7 +148,7 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
               </div>
             </div>
 
-            <div className="w-28 flex flex-col items-stretch gap-2">
+            <div className="w-28 flex flex-col items-stretch gap-2 justify-end">
               <Button size="sm" className="flex-1 rounded-xl" onClick={() => window.open(resource.url, '_blank')}>
                 {resource.type === 'article' ? 'Read' : resource.type === 'video' ? 'Watch' : 'Listen'}
               </Button>
@@ -163,7 +163,7 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
             </div>
           </div>
         </CardContent>
-      </Card>
+  </Card>
     );
   };
 
@@ -172,11 +172,11 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
     const halfLen = Math.ceil(resource.description.length / 2);
     const displayedDesc = expanded ? resource.description : (resource.description.length > halfLen ? resource.description.slice(0, halfLen).trim() + '...' : resource.description);
     return (
-      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200">
-        <div className="relative h-32">
+      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200 h-full flex flex-col">
+        <div className="relative h-[6.4rem]">
           <ImageWithFallback src={resource.image} alt={resource.title} className="w-full h-full object-cover rounded-t-2xl" />
         </div>
-        <CardContent className="p-3">
+        <CardContent className="p-3 flex flex-col flex-1">
           <h3 className="text-lg font-semibold mb-1">{resource.title}</h3>
           <p className={`text-sm text-muted-foreground mb-3`}>{displayedDesc}</p>
           {!expanded ? (
@@ -193,7 +193,7 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
             <div className="flex items-center gap-3"><Clock className="w-4 h-4" />{resource.duration}</div>
             <div className="flex items-center gap-1"><Star className="w-4 h-4 text-yellow-400" />{resource.rating}</div>
           </div>
-          <div className="flex space-x-2">
+          <div className="mt-auto flex space-x-2">
             <Button size="sm" className="flex-1 rounded-xl" onClick={() => window.open(resource.url, '_blank')}>Watch</Button>
             <Button size="sm" variant="outline" className="rounded-xl"><Heart className="w-4 h-4" /></Button>
             <Button size="sm" variant="outline" className="rounded-xl"><Download className="w-4 h-4" /></Button>
@@ -208,11 +208,11 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
     const halfLen = Math.ceil(resource.description.length / 2);
     const displayedDesc = expanded ? resource.description : (resource.description.length > halfLen ? resource.description.slice(0, halfLen).trim() + '...' : resource.description);
     return (
-      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200">
-        <div className="relative h-32">
+      <Card className="overflow-hidden rounded-2xl border hover:shadow-lg transition-shadow duration-200 h-full flex flex-col">
+        <div className="relative h-[6.4rem]">
           <ImageWithFallback src={resource.image} alt={resource.title} className="w-full h-full object-cover rounded-t-2xl" />
         </div>
-        <CardContent className="p-3">
+        <CardContent className="p-3 flex flex-col flex-1">
           <h3 className="text-lg font-semibold mb-1">{resource.title}</h3>
           <p className={`text-sm text-muted-foreground mb-3`}>{displayedDesc}</p>
           {!expanded ? (
@@ -230,7 +230,7 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
             <div className="flex items-center gap-1"><Star className="w-4 h-4 text-yellow-400" />{resource.rating}</div>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="mt-auto flex space-x-2">
             <Button size="sm" className="flex-1 rounded-xl" onClick={() => window.open(resource.url, '_blank')}>Listen</Button>
             <Button size="sm" variant="outline" className="rounded-xl"><Heart className="w-4 h-4" /></Button>
             <Button size="sm" variant="outline" className="rounded-xl"><Download className="w-4 h-4" /></Button>
@@ -283,8 +283,12 @@ export default function SelfHelpScreen({ language = 'en' }: { language?: 'en' | 
               <p className="text-muted-foreground">Try adjusting your search terms or filters to find what you're looking for.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredResources.map(r => <div key={r.id}>{r.type === 'video' ? <VideoCard resource={r} /> : r.type === 'audio' ? <AudioCard resource={r} /> : <ResourceCard resource={r} />}</div>)}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+              {filteredResources.map(r => (
+                <div key={r.id} className="h-full">
+                  {r.type === 'video' ? <VideoCard resource={r} /> : r.type === 'audio' ? <AudioCard resource={r} /> : <ResourceCard resource={r} />}
+                </div>
+              ))}
             </div>
           )}
         </section>
