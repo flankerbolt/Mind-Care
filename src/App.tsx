@@ -189,7 +189,7 @@ export default function App() {
                       aria-pressed={isActive}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-violet-600 group-hover:text-violet-700'}`} />
+                        <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-black' : 'text-violet-600 group-hover:text-violet-700'}`} />
                         <span className={`whitespace-nowrap text-sm font-medium transition-opacity duration-300
                           ${isActive ? 'text-black opacity-100' : 'text-black opacity-0 group-hover:opacity-100' }
                           `}
