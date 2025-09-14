@@ -1,0 +1,35 @@
+{
+  "nivi_resouces_vidio": {
+    "pdf": "C:\\Users\\USER\\Desktop\\Mind care\\nivi_resouces_vidio.pdf",
+    "thumbnail": "C:\\Users\\USER\\Desktop\\Mind care\\src\\assets\\selfhelp\\nivi_resouces_vidio.png",
+    "links": [
+      "https://youtu.be/Q4UG3PMSk6k",
+      "https://youtu.be/f-HHP669qRs",
+      "https://youtu.be/J4zzVCJorwE",
+      "https://youtu.be/Ii5m8Ta1iBY",
+      "https://youtu.be/3QIfkeA6HBY"
+    ]
+  },
+  "nivi_audio": {
+    "pdf": "C:\\Users\\USER\\Desktop\\Mind care\\nivi_audio.pdf",
+    "thumbnail": "C:\\Users\\USER\\Desktop\\Mind care\\src\\assets\\selfhelp\\nivi_audio.png",
+    "links": [
+      "https://youtu.be/Z8ANihFXlgU",
+      "https://youtu.be/NVlxJRihpdE",
+      "https://youtu.be/_V-Fj0Y8Izg",
+      "https://youtu.be/YOcjt-Ietj4",
+      "https://youtu.be/4LeyBbDBvQQ"
+    ]
+  },
+  "nivi_artical": {
+    "pdf": "C:\\Users\\USER\\Desktop\\Mind care\\nivi_artical.pdf",
+    "thumbnail": "C:\\Users\\USER\\Desktop\\Mind care\\src\\assets\\selfhelp\\nivi_artical.png",
+    "links": [
+      "https://www.wikihow.com/Deal-With-Exam-Stress",
+      "https://neurolaunch.com/5-minute-mindfulness-activities-for-students/",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC11871965/",
+      "https://www.verywellhealth.com/signs-of-burnout-8683361",
+      "https://www.buoyhealth.com/learn/mental-health-red-flags"
+    ]
+  }
+}
