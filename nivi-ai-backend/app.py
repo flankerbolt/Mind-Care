@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 custom_responses = {
-    "what is your name": "My name is NIVI 🙂",
+    "what is your name": "My name is ZENVIBE 🙂",
     "who made you": """I was created by my amazing team:
 
 Archisman Karmakar (Frontend Engineer, Team Lead)
@@ -56,4 +56,5 @@ def chat():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
+
     app.run(debug=True, host='0.0.0.0', port=port)
